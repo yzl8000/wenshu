@@ -20,7 +20,7 @@ import { useDebouncedCallback } from 'use-debounce';
 const { Text } = Typography;
 
 export default function NovelEditor({ novelId }: { novelId: string }) {
-  const { currentChapter, saveStatus, loadChapter, setContent, autoSave, updateChapterStatus } = useNovelStore();
+  const { currentChapter, saveStatus, setContent, autoSave, updateChapterStatus } = useNovelStore();
 
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiResultText, setAiResultText] = useState('');
