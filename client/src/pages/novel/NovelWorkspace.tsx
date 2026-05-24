@@ -7,7 +7,6 @@ import {
   FileTextOutlined, ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { useNovelStore } from '../../stores/useNovelStore';
-
 import NovelEditor from './NovelEditor';
 import CharacterGraphPage from './CharacterGraphPage';
 import OutlinePage from './OutlinePage';

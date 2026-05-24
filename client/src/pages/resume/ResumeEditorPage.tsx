@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Form, Input, Select, Space, Typography, Divider, Spin, message, Modal } from 'antd';
+import { Card, Button, Form, Input, Select, Space, Divider, Spin, message, Modal } from 'antd';
 import { ArrowLeftOutlined, SaveOutlined, RobotOutlined } from '@ant-design/icons';
 import { useResumeStore } from '../../stores/useResumeStore';
 import type { ResumeSection } from '../../stores/useResumeStore';
@@ -373,7 +373,7 @@ function ResumePreview({ sections }: { sections: ResumeSection[] }) {
         </div>
       )}
       {/* Experience */}
-      {experience?.['experience']?.length > 0 && (() => {
+      {experience && experience['experience'] && (experience['experience'] as Array<Record<string, string>>).length > 0 && (() => {
         const exp = experience['experience'] as Array<Record<string, string>>;
         return (
           <div style={{ marginBottom: 16 }}>
@@ -389,7 +389,7 @@ function ResumePreview({ sections }: { sections: ResumeSection[] }) {
         );
       })()}
       {/* Education */}
-      {education?.['education']?.length > 0 && (() => {
+      {education && education['education'] && (education['education'] as Array<Record<string, string>>).length > 0 && (() => {
         const edu = education['education'] as Array<Record<string, string>>;
         return (
           <div style={{ marginBottom: 16 }}>
@@ -404,7 +404,7 @@ function ResumePreview({ sections }: { sections: ResumeSection[] }) {
         );
       })()}
       {/* Skills */}
-      {skills?.['skills']?.length > 0 && (() => {
+      {skills && skills['skills'] && (skills['skills'] as Array<Record<string, string>>).length > 0 && (() => {
         const sk = skills['skills'] as Array<Record<string, string>>;
         return (
           <div>
