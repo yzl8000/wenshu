@@ -8,7 +8,7 @@
     "dev:server": "cd server && npm run dev",
     "postinstall": "cd client && npm install && cd ../server && npm install",
     "build": "cd client && npm run build",
-    "start": "cd server && npx prisma migrate deploy && npx tsx prisma/seed.ts && NODE_ENV=production npx tsx src/index.ts",
+    "start": "cd server && npx prisma db push && npx tsx prisma/seed.ts && NODE_ENV=production npx tsx src/index.ts",
     "install:all": "cd client && npm install && cd ../server && npm install",
     "db:migrate": "cd server && npx prisma migrate dev",
     "db:seed": "cd server && npx prisma db seed",

@@ -3,7 +3,7 @@ services:
     name: wenshu
     env: node
     buildCommand: cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate
-    startCommand: cd server && npx prisma migrate deploy && npx tsx prisma/seed.ts && NODE_ENV=production npx tsx src/index.ts
+    startCommand: cd server && npx prisma db push && npx tsx prisma/seed.ts && NODE_ENV=production npx tsx src/index.ts
     envVars:
       - key: DATABASE_URL
         value: file:./dev.db
