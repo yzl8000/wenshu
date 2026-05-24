@@ -1,17 +1,17 @@
 {
-  "name": "wenshu-platform",
+  "name": "wenshu",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
-    "build": "cd client && npm run build && cd ../server && npm run build",
-    "start": "cd server && npm start",
+    "postinstall": "cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build",
+    "start": "cd server && npx prisma migrate deploy && npx tsx prisma/seed.ts && NODE_ENV=production npx tsx src/index.ts",
     "install:all": "cd client && npm install && cd ../server && npm install",
     "db:migrate": "cd server && npx prisma migrate dev",
     "db:seed": "cd server && npx prisma db seed",
-    "db:studio": "cd server && npx prisma studio",
-    "deploy": "npm run build && npm run start"
+    "db:studio": "cd server && npx prisma studio"
   }
 }
