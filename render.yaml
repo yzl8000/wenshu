@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: wenshu
+    env: node
+    buildCommand: cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate
+    startCommand: cd server && npx prisma migrate deploy && npx tsx prisma/seed.ts && NODE_ENV=production npx tsx src/index.ts
+    envVars:
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: JWT_ACCESS_SECRET
+        value: a8f5b2c1d3e9f4a6b8c0d2e4f6a8b0c2
+      - key: JWT_REFRESH_SECRET
+        value: b9c1d3e5f7a9b1c3d5e7f9a1b3c5d7e9
+      - key: JWT_ACCESS_EXPIRES
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES
+        value: 30d
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: AI_PROVIDER
+        value: deepseek
+      - key: AI_API_KEY
+        value: sk-d9999df27a1f46c797a76618e6a096a1
+      - key: AI_MODEL
+        value: deepseek-chat
