@@ -7,7 +7,7 @@ import { useResumeStore } from '../../stores/useResumeStore';
 const { Title, Text } = Typography;
 
 export default function ResumeListPage() {
-  const { resumes, templates, loading, fetchResumes, fetchTemplates, createResume, deleteResume } = useResumeStore();
+  const { resumes, templates, fetchResumes, fetchTemplates, createResume, deleteResume } = useResumeStore();
   const navigate = useNavigate();
 
   useEffect(() => {

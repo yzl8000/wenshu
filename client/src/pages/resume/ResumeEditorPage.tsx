@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Form, Input, Select, Space, Typography, Divider, Empty, Spin, message, Modal } from 'antd';
+import { Card, Button, Form, Input, Select, Space, Typography, Divider, Spin, message, Modal } from 'antd';
 import { ArrowLeftOutlined, SaveOutlined, RobotOutlined } from '@ant-design/icons';
 import { useResumeStore } from '../../stores/useResumeStore';
 import type { ResumeSection } from '../../stores/useResumeStore';
 import { useAIStore } from '../../stores/useAIStore';
 
-const { Title } = Typography;
 const { TextArea } = Input;
 
 const SECTION_LABELS: Record<string, string> = {
@@ -374,8 +373,8 @@ function ResumePreview({ sections }: { sections: ResumeSection[] }) {
         </div>
       )}
       {/* Experience */}
-      {experience?.[sectionType]?.length > 0 && (() => {
-        const exp = experience[sectionType] as Array<Record<string, string>>;
+      {experience?.['experience']?.length > 0 && (() => {
+        const exp = experience['experience'] as Array<Record<string, string>>;
         return (
           <div style={{ marginBottom: 16 }}>
             <h3 style={{ borderBottom: '2px solid #333', paddingBottom: 4, marginBottom: 8, fontSize: 14 }}>工作经历</h3>
@@ -390,8 +389,8 @@ function ResumePreview({ sections }: { sections: ResumeSection[] }) {
         );
       })()}
       {/* Education */}
-      {education?.[sectionType]?.length > 0 && (() => {
-        const edu = education[sectionType] as Array<Record<string, string>>;
+      {education?.['education']?.length > 0 && (() => {
+        const edu = education['education'] as Array<Record<string, string>>;
         return (
           <div style={{ marginBottom: 16 }}>
             <h3 style={{ borderBottom: '2px solid #333', paddingBottom: 4, marginBottom: 8, fontSize: 14 }}>教育背景</h3>
@@ -405,8 +404,8 @@ function ResumePreview({ sections }: { sections: ResumeSection[] }) {
         );
       })()}
       {/* Skills */}
-      {skills?.[sectionType]?.length > 0 && (() => {
-        const sk = skills[sectionType] as Array<Record<string, string>>;
+      {skills?.['skills']?.length > 0 && (() => {
+        const sk = skills['skills'] as Array<Record<string, string>>;
         return (
           <div>
             <h3 style={{ borderBottom: '2px solid #333', paddingBottom: 4, marginBottom: 8, fontSize: 14 }}>技能特长</h3>

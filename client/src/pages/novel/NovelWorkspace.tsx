@@ -1,14 +1,13 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Layout, Button, Input, Tree, Tag, Space, Typography, Spin, Empty, message, Popconfirm } from 'antd';
+import { Layout, Button, Input, Tree, Space, Typography, Spin, Empty, message, Popconfirm } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined,
   ApartmentOutlined, LineChartOutlined, SettingOutlined,
-  BookOutlined, FileTextOutlined, ArrowLeftOutlined,
+  FileTextOutlined, ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { useNovelStore } from '../../stores/useNovelStore';
-import type { Chapter } from '../../stores/useNovelStore';
-import { useDebouncedCallback } from 'use-debounce';
+
 import NovelEditor from './NovelEditor';
 import CharacterGraphPage from './CharacterGraphPage';
 import OutlinePage from './OutlinePage';
@@ -32,9 +31,8 @@ export default function NovelWorkspace() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const {
-    chapters, currentChapter, loading, currentNovelId,
+    chapters, currentChapter, loading,
     loadNovelChapters, createChapter, loadChapter, deleteChapter,
-    reorderChapters,
   } = useNovelStore();
   const [activeTab, setActiveTab] = useState<TabKey>('editor');
   const [addingChapter, setAddingChapter] = useState(false);

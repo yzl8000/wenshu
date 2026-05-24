@@ -7,7 +7,6 @@ import api from '../../services/api';
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-const RELATION_TYPES = ['friend', 'enemy', 'family', 'lover', 'mentor', 'rival', 'other'];
 const RELATION_LABELS: Record<string, string> = {
   friend: '朋友', enemy: '敌人', family: '家人', lover: '恋人', mentor: '导师', rival: '对手', other: '其他',
 };
@@ -32,7 +31,6 @@ interface Relation {
 export default function CharacterGraphPage({ novelId }: { novelId: string }) {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [relationships, setRelationships] = useState<Relation[]>([]);
-  const [loading, setLoading] = useState(false);
   const [charModalOpen, setCharModalOpen] = useState(false);
   const [relModalOpen, setRelModalOpen] = useState(false);
   const [editingChar, setEditingChar] = useState<Character | null>(null);
@@ -41,14 +39,12 @@ export default function CharacterGraphPage({ novelId }: { novelId: string }) {
   const [relForm] = Form.useForm();
 
   const fetchData = async () => {
-    setLoading(true);
     const [charRes, relRes] = await Promise.all([
       api.get(`/novels/${novelId}/characters`),
       api.get(`/novels/${novelId}/relationships`),
     ]);
     setCharacters(charRes.data.characters);
     setRelationships(relRes.data.relationships || []);
-    setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, [novelId]);

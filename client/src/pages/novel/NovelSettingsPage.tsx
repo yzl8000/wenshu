@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Form, Input, InputNumber, Button, Select, Typography, Divider, Space, message, Empty, List, Tag, Popconfirm, Switch } from 'antd';
+import { Card, Form, Input, InputNumber, Button, Select, Typography, Divider, Space, message, Empty, List, Popconfirm, Switch } from 'antd';
 import { SaveOutlined, DownloadOutlined, DeleteOutlined } from '@ant-design/icons';
 import api from '../../services/api';
 import { useAppStore } from '../../stores/useAppStore';
@@ -13,7 +13,6 @@ interface Goal {
 
 export default function NovelSettingsPage({ novelId }: { novelId: string }) {
   const { theme, setTheme } = useAppStore();
-  const [novel, setNovel] = useState<{ title: string; description: string; genre: string; targetWords: number; status: string } | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [form] = Form.useForm();
   const [goalForm] = Form.useForm();
@@ -23,7 +22,6 @@ export default function NovelSettingsPage({ novelId }: { novelId: string }) {
       api.get(`/novels/${novelId}`),
       api.get(`/novels/${novelId}/goals`),
     ]);
-    setNovel(novelRes.data.novel);
     setGoals(goalsRes.data.goals);
     form.setFieldsValue(novelRes.data.novel);
   };
