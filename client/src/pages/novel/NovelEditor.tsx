@@ -10,7 +10,7 @@ import {
   BoldOutlined, ItalicOutlined, StrikethroughOutlined,
   OrderedListOutlined, UnorderedListOutlined,
   AlignLeftOutlined, AlignCenterOutlined, AlignRightOutlined,
-  UndoOutlined, RedoOutlined, HighlightOutlined,
+  UndoOutlined, RedoOutlined,
   RobotOutlined, ThunderboltOutlined,
 } from '@ant-design/icons';
 import { useNovelStore } from '../../stores/useNovelStore';
@@ -20,7 +20,7 @@ import { useDebouncedCallback } from 'use-debounce';
 const { Text } = Typography;
 
 export default function NovelEditor({ novelId }: { novelId: string }) {
-  const { currentChapter, isDirty, saveStatus, loadChapter, setContent, autoSave, updateChapterStatus, chapters } = useNovelStore();
+  const { currentChapter, saveStatus, loadChapter, setContent, autoSave, updateChapterStatus } = useNovelStore();
 
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiResultText, setAiResultText] = useState('');
@@ -112,10 +112,6 @@ export default function NovelEditor({ novelId }: { novelId: string }) {
       editor.commands.setContent(currentChapter.contentJson || null);
     }
   }, [currentChapter?.id]);
-
-  const handleChapterSelect = (chapterId: string) => {
-    loadChapter(novelId, chapterId);
-  };
 
   if (!editor) return null;
 

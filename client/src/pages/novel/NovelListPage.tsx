@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Card, Button, Row, Col, Typography, Empty, Tag, Modal, Form, Input, InputNumber, Select, Popconfirm, message, Statistic } from 'antd';
+import { Card, Button, Row, Col, Typography, Empty, Tag, Modal, Form, Input, InputNumber, Select, Popconfirm, message, Statistic, Space } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, BookOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useNovelStore } from '../../stores/useNovelStore';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 const GENRES = ['玄幻', '奇幻', '武侠', '仙侠', '都市', '历史', '科幻', '悬疑', '言情', '游戏', '其他'];
 
 export default function NovelListPage() {
-  const { novels, loading, fetchNovels, createNovel, deleteNovel } = useNovelStore();
+  const { novels, fetchNovels, createNovel, deleteNovel } = useNovelStore();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
