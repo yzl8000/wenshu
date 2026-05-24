@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Button, Input, Modal, Space, Typography, Empty, Tree, Tag, message, Popconfirm, ColorPicker } from 'antd';
+import { Card, Button, Input, Modal, Space, Typography, Empty, Tree, Tag, message, Popconfirm, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined } from '@ant-design/icons';
 import type { DataNode } from 'antd/es/tree';
 import api from '../../services/api';
@@ -157,7 +157,7 @@ export default function OutlinePage({ novelId }: { novelId: string }) {
                   placeholder="关联章节（可选）"
                   style={{ width: '100%', marginTop: 4 }}
                   allowClear
-                  onChange={(v) => handleLinkChapter(v)}
+                  onChange={(v: string) => handleLinkChapter(v)}
                   options={chapters.map((c) => ({ value: c.id, label: c.title }))}
                 />
               )}
