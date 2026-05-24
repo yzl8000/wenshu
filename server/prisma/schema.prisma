@@ -1,0 +1,228 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  plagiarismChecks PlagiarismCheck[]
+  resumes          Resume[]
+  novels           Novel[]
+  writingSessions  WritingSession[]
+  writingGoals     WritingGoal[]
+}
+
+model PlagiarismCheck {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String?
+  content    String
+  sourceType String   @default("text_input")
+  fileName   String?
+  fileSize   Int?
+  status     String   @default("processing")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  results PlagiarismResult[]
+}
+
+model PlagiarismResult {
+  id                String   @id @default(cuid())
+  checkId           String
+  sourceLabel       String
+  sourceType        String   @default("local")
+  overallSimilarity Float
+  matchedWordCount  Int      @default(0)
+  totalWordCount    Int      @default(0)
+  createdAt         DateTime @default(now())
+
+  check   PlagiarismCheck @relation(fields: [checkId], references: [id], onDelete: Cascade)
+  matches Match[]
+}
+
+model Match {
+  id             String   @id @default(cuid())
+  resultId       String
+  sourceText     String
+  targetText     String
+  similarity     Float
+  positionStart  Int
+  positionEnd    Int
+  sourcePositionStart Int?
+  sourcePositionEnd   Int?
+  createdAt      DateTime @default(now())
+
+  result PlagiarismResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+}
+
+model ResumeTemplate {
+  id         String   @id @default(cuid())
+  name       String
+  thumbnail  String?
+  configJson String   @default("{}")
+  createdAt  DateTime @default(now())
+
+  resumes Resume[]
+}
+
+model Resume {
+  id         String   @id @default(cuid())
+  userId     String
+  templateId String
+  title      String
+  status     String   @default("draft")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template ResumeTemplate  @relation(fields: [templateId], references: [id])
+  sections ResumeSection[]
+}
+
+model ResumeSection {
+  id          String   @id @default(cuid())
+  resumeId    String
+  sectionType String
+  title       String?
+  contentJson String   @default("{}")
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+
+model Novel {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+  coverImage  String?
+  genre       String?
+  targetWords Int?
+  status      String   @default("planning")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapters   Chapter[]
+  characters Character[]
+  outlines   Outline[]
+  relationships Relationship[]
+  writingSessions WritingSession[]
+  writingGoals    WritingGoal[]
+}
+
+model Chapter {
+  id          String   @id @default(cuid())
+  novelId     String
+  parentId    String?
+  title       String
+  contentJson String?
+  plainText   String?
+  wordCount   Int      @default(0)
+  sortOrder   Int      @default(0)
+  status      String   @default("draft")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  novel    Novel     @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  parent   Chapter?  @relation("ChapterHierarchy", fields: [parentId], references: [id])
+  children Chapter[] @relation("ChapterHierarchy")
+  linkedOutlines Outline[]
+  writingSessions WritingSession[]
+}
+
+model Character {
+  id          String   @id @default(cuid())
+  novelId     String
+  name        String
+  role        String?
+  description String?
+  avatar      String?
+  attributes  String?
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  novel              Novel          @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  relationshipsFrom  Relationship[] @relation("SourceCharacter")
+  relationshipsTo    Relationship[] @relation("TargetCharacter")
+}
+
+model Relationship {
+  id                String   @id @default(cuid())
+  novelId           String
+  sourceCharacterId String
+  targetCharacterId String
+  relationshipType  String   @default("other")
+  label             String?
+  description       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  novel           Novel     @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  sourceCharacter Character @relation("SourceCharacter", fields: [sourceCharacterId], references: [id], onDelete: Cascade)
+  targetCharacter Character @relation("TargetCharacter", fields: [targetCharacterId], references: [id], onDelete: Cascade)
+}
+
+model Outline {
+  id              String   @id @default(cuid())
+  novelId         String
+  parentId        String?
+  title           String
+  description     String?
+  noteContent     String?
+  linkedChapterId String?
+  sortOrder       Int      @default(0)
+  color           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  novel         Novel     @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  parent        Outline?  @relation("OutlineHierarchy", fields: [parentId], references: [id])
+  children      Outline[] @relation("OutlineHierarchy")
+  linkedChapter Chapter?  @relation(fields: [linkedChapterId], references: [id])
+}
+
+model WritingSession {
+  id        String    @id @default(cuid())
+  userId    String
+  novelId   String
+  chapterId String?
+  wordCount Int       @default(0)
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel   Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapter Chapter? @relation(fields: [chapterId], references: [id])
+}
+
+model WritingGoal {
+  id              String   @id @default(cuid())
+  userId          String
+  novelId         String?
+  dailyWordTarget Int
+  startDate       DateTime
+  endDate         DateTime?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel Novel? @relation(fields: [novelId], references: [id])
+}
