@@ -21,6 +21,7 @@ import {
   LikeOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../../stores/useAuthStore';
+import ShareButtons from '../../components/ShareButtons/ShareButtons';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -491,6 +492,13 @@ export default function LandingPage() {
           </div>
 
           <Divider style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '16px 0' }} />
+          <div style={{ marginBottom: 16 }}>
+            <ShareButtons
+              title="文枢 - AI驱动的免费创作平台"
+              description="论文查重 · 简历编写 · 小说写作，完全免费，快来试试！"
+              url="https://wenshu-production.up.railway.app"
+            />
+          </div>
           <div style={{ fontSize: 13 }}>
             © 2026 文枢 wenshu.app · 保留一切权利 · 永久免费
           </div>
