@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Form, Input, Button, Card, Typography, message } from 'antd';
-import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { Form, Input, Button, Card, Typography, message, Alert } from 'antd';
+import { MailOutlined, LockOutlined, UserOutlined, GiftOutlined } from '@ant-design/icons';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/useAuthStore';
 
 const { Title, Text } = Typography;
@@ -10,11 +10,13 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const register = useAuthStore((s) => s.register);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refCode = useMemo(() => searchParams.get('ref') || '', [searchParams]);
 
-  const onFinish = async (values: { email: string; password: string; name: string }) => {
+  const onFinish = async (values: { email: string; password: string; name: string; referralCode?: string }) => {
     setLoading(true);
     try {
-      await register(values.email, values.password, values.name);
+      await register(values.email, values.password, values.name, values.referralCode || refCode);
       message.success('注册成功');
       navigate('/app/dashboard');
     } catch (err: unknown) {
@@ -32,6 +34,15 @@ export default function RegisterPage() {
         <Text type="secondary" style={{ display: 'block', textAlign: 'center', marginBottom: 32 }}>
           开始您的创作之旅
         </Text>
+        {refCode && (
+          <Alert
+            type="success"
+            message={`好友邀请你加入文枢！推荐码: ${refCode}`}
+            icon={<GiftOutlined />}
+            style={{ marginBottom: 16 }}
+            showIcon
+          />
+        )}
         <Form layout="vertical" onFinish={onFinish} autoComplete="off">
           <Form.Item name="name" rules={[{ required: true, message: '请输入姓名' }]}>
             <Input prefix={<UserOutlined />} placeholder="姓名" size="large" />
@@ -41,6 +52,9 @@ export default function RegisterPage() {
           </Form.Item>
           <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }, { min: 6, message: '密码至少6位' }]}>
             <Input.Password prefix={<LockOutlined />} placeholder="密码" size="large" />
+          </Form.Item>
+          <Form.Item name="referralCode" initialValue={refCode}>
+            <Input prefix={<GiftOutlined />} placeholder="推荐码（选填）" size="large" />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block size="large">

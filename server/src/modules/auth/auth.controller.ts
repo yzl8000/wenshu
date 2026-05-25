@@ -6,6 +6,7 @@ const registerSchema = z.object({
   email: z.string().email('邮箱格式不正确'),
   password: z.string().min(6, '密码至少6位'),
   name: z.string().min(1, '姓名不能为空'),
+  referralCode: z.string().optional(),
 });
 
 const loginSchema = z.object({
