@@ -1,6 +1,7 @@
-import { Card, Col, Row, Statistic, Typography } from 'antd';
+import { Card, Col, Row, Statistic, Typography, Tag } from 'antd';
 import { FileSearchOutlined, FileTextOutlined, BookOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import AdBanner from '../../components/AdBanner/AdBanner';
 
 const { Title, Paragraph } = Typography;
 
@@ -10,7 +11,7 @@ const features = [
     title: '论文查重',
     icon: <FileSearchOutlined style={{ fontSize: 48, color: '#667eea' }} />,
     description: '基于 SimHash 和余弦相似度算法的智能查重系统，支持文本输入和文件上传，提供详细的相似度报告和高亮对比。',
-    path: '/plagiarism',
+    path: '/app/plagiarism',
     stat: '0 次检测',
   },
   {
@@ -18,7 +19,7 @@ const features = [
     title: '简历编写',
     icon: <FileTextOutlined style={{ fontSize: 48, color: '#52c41a' }} />,
     description: '多款专业模板任选，表单化编辑实时预览，一键导出高清 PDF 简历，支持随时保存草稿。',
-    path: '/resumes',
+    path: '/app/resumes',
     stat: '0 份简历',
   },
   {
@@ -26,7 +27,7 @@ const features = [
     title: '小说写作',
     icon: <BookOutlined style={{ fontSize: 48, color: '#fa8c16' }} />,
     description: '完整的写作工作台：富文本编辑器、章节管理、人物关系图谱、大纲规划、写作统计追踪。',
-    path: '/novels',
+    path: '/app/novels',
     stat: '0 部小说',
   },
 ];
@@ -36,9 +37,12 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <Title level={3} style={{ marginBottom: 24 }}>欢迎使用文枢</Title>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <Title level={3} style={{ margin: 0 }}>欢迎使用文枢</Title>
+        <Tag color="green">永久免费</Tag>
+      </div>
       <Paragraph type="secondary" style={{ marginBottom: 32 }}>
-        一站式内容创作工具，涵盖论文查重、简历编写和小说写作三大核心功能。
+        一站式内容创作工具，涵盖论文查重、简历编写和小说写作三大核心功能，AI 全程辅助，完全免费。
       </Paragraph>
       <Row gutter={[24, 24]}>
         {features.map((feature) => (
@@ -56,6 +60,9 @@ export default function DashboardPage() {
           </Col>
         ))}
       </Row>
+      <div style={{ marginTop: 32 }}>
+        <AdBanner slot="in-content" />
+      </div>
     </div>
   );
 }

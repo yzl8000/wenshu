@@ -16,7 +16,7 @@ export default function LoginPage() {
     try {
       await login(values.email, values.password);
       message.success('登录成功');
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error || '登录失败';
       message.error(msg);

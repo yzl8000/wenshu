@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AuthGuard from '../components/AuthGuard/AuthGuard';
 import AppLayout from '../components/AppLayout/AppLayout';
+import LandingPage from '../pages/landing/LandingPage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import DashboardPage from '../pages/dashboard/DashboardPage';
@@ -12,15 +13,17 @@ import NovelWorkspace from '../pages/novel/NovelWorkspace';
 import ProfilePage from '../pages/profile/ProfilePage';
 
 export const router = createBrowserRouter([
+  { path: '/', element: <LandingPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   {
     element: <AuthGuard />,
     children: [
       {
+        path: '/app',
         element: <AppLayout />,
         children: [
-          { index: true, element: <Navigate to="/dashboard" replace /> },
+          { index: true, element: <Navigate to="/app/dashboard" replace /> },
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'plagiarism', element: <PlagiarismPage /> },
           { path: 'resumes', element: <ResumeListPage /> },
@@ -32,4 +35,5 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  { path: '*', element: <Navigate to="/" replace /> },
 ]);

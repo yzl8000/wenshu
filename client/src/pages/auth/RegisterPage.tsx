@@ -16,7 +16,7 @@ export default function RegisterPage() {
     try {
       await register(values.email, values.password, values.name);
       message.success('注册成功');
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error || '注册失败';
       message.error(msg);

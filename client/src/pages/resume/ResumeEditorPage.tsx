@@ -89,7 +89,7 @@ export default function ResumeEditorPage() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, overflow: 'auto' }}>
         <Card size="small">
           <Space>
-            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/resumes')}>返回</Button>
+            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/app/resumes')}>返回</Button>
             <Input
               defaultValue={currentResume.title}
               style={{ width: 200 }}

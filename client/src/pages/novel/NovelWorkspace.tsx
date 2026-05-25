@@ -112,7 +112,7 @@ export default function NovelWorkspace() {
       <Sider width={260} theme="light" style={{ borderRight: '1px solid #f0f0f0', overflow: 'auto', background: '#fafafa' }}>
         <div style={{ padding: '12px 16px' }}>
           <Space style={{ marginBottom: 8 }}>
-            <Button icon={<ArrowLeftOutlined />} size="small" onClick={() => navigate('/novels')}>返回</Button>
+            <Button icon={<ArrowLeftOutlined />} size="small" onClick={() => navigate('/app/novels')}>返回</Button>
           </Space>
           <Title level={5} ellipsis style={{ margin: 0 }}>{novelTitle || '加载中...'}</Title>
         </div>
