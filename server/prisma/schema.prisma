@@ -15,6 +15,7 @@ model User {
   avatar       String?
   referralCode String?  @unique
   referredBy   String?
+  balance      Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -25,6 +26,21 @@ model User {
   writingGoals     WritingGoal[]
   referredUsers    User[]            @relation("Referral")
   referrer         User?             @relation("Referral", fields: [referredBy], references: [referralCode])
+  transactions     Transaction[]
+}
+
+model Transaction {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String
+  amount      Int
+  balance     Int
+  description String?
+  status      String    @default("completed")
+  paymentMethod String?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PlagiarismCheck {

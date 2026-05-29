@@ -11,6 +11,7 @@ import ResumeEditorPage from '../pages/resume/ResumeEditorPage';
 import NovelListPage from '../pages/novel/NovelListPage';
 import NovelWorkspace from '../pages/novel/NovelWorkspace';
 import ProfilePage from '../pages/profile/ProfilePage';
+import WalletPage from '../pages/wallet/WalletPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
           { path: 'novels', element: <NovelListPage /> },
           { path: 'novels/:id', element: <NovelWorkspace /> },
           { path: 'profile', element: <ProfilePage /> },
+          { path: 'wallet', element: <WalletPage /> },
         ],
       },
     ],

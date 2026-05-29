@@ -59,8 +59,8 @@ const aiFeatures = [
 ];
 
 const testimonials = [
-  { name: '小王', role: '大四学生', avatar: '王', content: '写毕业论文的时候用文枢查重，免费还能联网比对，帮我省了好几百块的查重费用，真的太良心了！', rating: 5 },
-  { name: '李同学', role: '应届毕业生', avatar: '李', content: '简历模板很专业，AI 优化措辞后，面试邀请明显多了。关键是完全免费，同学们都在用。', rating: 5 },
+  { name: '小王', role: '大四学生', avatar: '王', content: '写毕业论文的时候用文枢查重，几块钱就能查一次，比外面几百块的便宜太多了，还支持联网比对，真的很良心！', rating: 5 },
+  { name: '李同学', role: '应届毕业生', avatar: '李', content: '简历模板很专业，AI 优化措辞后，面试邀请明显多了。花十几块钱就能用好久，性价比超高。', rating: 5 },
   { name: '张老师', role: '网文作者', avatar: '张', content: '小说写作功能太强了，人物关系图帮我理清了复杂剧情，写作统计让我保持日更动力。推荐给所有码字的朋友。', rating: 5 },
 ];
 
@@ -69,18 +69,18 @@ const comparisonData = [
   { feature: '简历编写', wenshu: true, youdao: true, zhiwang: false, paperpass: false },
   { feature: '小说写作', wenshu: true, youdao: false, zhiwang: false, paperpass: false },
   { feature: 'AI 辅助', wenshu: true, youdao: true, zhiwang: false, paperpass: false },
-  { feature: '完全免费', wenshu: true, youdao: false, zhiwang: false, paperpass: false },
+  { feature: '低至 ¥9.90', wenshu: true, youdao: false, zhiwang: false, paperpass: false },
   { feature: '数据云端存储', wenshu: true, youdao: true, zhiwang: true, paperpass: true },
   { feature: '多格式导出', wenshu: true, youdao: true, zhiwang: false, paperpass: true },
   { feature: 'API 开放', wenshu: true, youdao: false, zhiwang: false, paperpass: false },
 ];
 
 const faqItems = [
-  { q: '文枢真的完全免费吗？', a: '是的！所有功能永久免费使用，无隐藏收费，无需绑定信用卡。我们通过广告收入维持运营。' },
+  { q: '文枢怎么收费？', a: '采用积分制，最低 ¥9.90 起即可使用全部功能。查重一次消耗 10 积分(约0.1元)，比市面上几百块的查重服务便宜得多。' },
+  { q: '积分可以提现吗？', a: '可以！推荐好友获得的积分奖励和充值余额都支持提现到支付宝/微信，最低提现 10 元。' },
   { q: '论文查重准确率如何？', a: '采用 SimHash + 余弦相似度双重算法，准确率可达95%以上，支持联网搜索交叉验证。' },
   { q: '上传的文件安全吗？', a: '您的数据加密存储，不会用于任何其他目的。文件处理后会定期清理。' },
   { q: '支持哪些文件格式？', a: '论文查重支持 .docx、.pdf、.txt 格式上传。小说写作支持导出 PDF、EPUB、DOCX、TXT 四种格式。' },
-  { q: 'AI 功能需要自己配置吗？', a: '无需配置，开箱即用。AI 功能已经内置在平台中，完全免费供您使用。' },
 ];
 
 function CountUp({ end, suffix = '', duration = 2000 }: { end: number; suffix?: string; duration?: number }) {
@@ -136,13 +136,13 @@ export default function LandingPage() {
           文枢
         </Text>
         <Space>
-          <Tag color="green" style={{ fontSize: 13, padding: '2px 10px' }}>完全免费</Tag>
+          <Tag color="blue" style={{ fontSize: 13, padding: '2px 10px' }}>低至 ¥9.90</Tag>
           {user ? (
             <Button type="primary" onClick={() => navigate('/app/dashboard')}>进入工作台</Button>
           ) : (
             <>
               <Button onClick={() => navigate('/login')}>登录</Button>
-              <Button type="primary" onClick={() => navigate('/register')}>免费注册</Button>
+              <Button type="primary" onClick={() => navigate('/register')}>立即注册</Button>
             </>
           )}
         </Space>
@@ -154,17 +154,17 @@ export default function LandingPage() {
         padding: '80px 48px', textAlign: 'center', color: '#fff',
       }}>
         <Tag color="yellow" style={{ fontSize: 14, padding: '4px 16px', marginBottom: 24, fontWeight: 'bold', color: '#333' }}>
-          永久免费 · 无需付费
+          低至 ¥9.90 · 性价比之选
         </Tag>
         <Title level={1} style={{ color: '#fff', fontSize: 48, marginBottom: 16 }}>
           文枢 · AI 驱动的创作平台
         </Title>
         <Paragraph style={{ color: 'rgba(255,255,255,0.85)', fontSize: 18, maxWidth: 600, margin: '0 auto 32px' }}>
-          论文查重 · 简历编写 · 小说写作，三大工具一站配齐，AI 全程辅助，完全免费使用
+          论文查重 · 简历编写 · 小说写作，三大工具一站配齐，AI 全程辅助，低至 ¥9.90 起
         </Paragraph>
         <Space size="middle">
           <Button size="large" onClick={() => navigate('/register')} style={{ fontWeight: 'bold', height: 48, paddingInline: 32 }}>
-            立即免费使用
+            立即注册使用
           </Button>
           <Button size="large" ghost onClick={() => navigate('/login')} style={{ height: 48, paddingInline: 32 }}>
             已有账号？登录
@@ -174,7 +174,7 @@ export default function LandingPage() {
           {[
             { num: 3, label: '核心功能', suffix: '' },
             { num: 6, label: 'AI 能力', suffix: '+' },
-            { num: 0, label: '费用 (元)', suffix: '' },
+            { num: 990, label: '起售价', suffix: '' },
           ].map((s) => (
             <div key={s.label}>
               <CountUp end={s.num} suffix={s.suffix} />
@@ -375,21 +375,57 @@ export default function LandingPage() {
         </Row>
       </div>
 
-      {/* Why Free */}
-      <div style={{ background: '#f7f8fc', padding: '80px 48px', textAlign: 'center' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <Title level={2}>为什么完全免费？</Title>
-          <Paragraph type="secondary" style={{ fontSize: 16, lineHeight: 2 }}>
-            我们相信好的创作工具应该对所有人开放。通过广告收入维持服务器和 AI API 成本，
-            <br />
-            你只需享受创作，不必担心任何费用。
+      {/* Pricing */}
+      <div style={{ background: '#f7f8fc', padding: '80px 48px' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <Title level={2} style={{ textAlign: 'center', marginBottom: 8 }}>实惠透明定价</Title>
+          <Paragraph type="secondary" style={{ textAlign: 'center', marginBottom: 48, fontSize: 16 }}>
+            积分制付费，用多少花多少，拒绝高额收费
           </Paragraph>
-          <Space style={{ marginTop: 16 }} wrap>
-            <Tag icon={<SafetyOutlined />} color="green" style={{ fontSize: 14, padding: '4px 12px' }}>无需绑定信用卡</Tag>
-            <Tag icon={<SafetyOutlined />} color="green" style={{ fontSize: 14, padding: '4px 12px' }}>无隐藏收费</Tag>
-            <Tag icon={<RocketOutlined />} color="green" style={{ fontSize: 14, padding: '4px 12px' }}>持续迭代更新</Tag>
-            <Tag icon={<HeartOutlined />} color="green" style={{ fontSize: 14, padding: '4px 12px' }}>开源社区驱动</Tag>
-          </Space>
+          <Row gutter={[24, 24]}>
+            {[
+              { name: '基础版', price: '9.90', credits: 100, desc: '入门体验，适合轻度用户', popular: false },
+              { name: '标准版', price: '19.90', credits: 300, desc: '性价比之选，满足日常使用', popular: true },
+              { name: '专业版', price: '49.90', credits: 1000, desc: '重度用户首选，量大优惠', popular: false },
+            ].map((plan) => (
+              <Col xs={24} md={8} key={plan.name}>
+                <Card
+                  hoverable
+                  style={{
+                    textAlign: 'center', borderRadius: 12,
+                    border: plan.popular ? '2px solid #667eea' : undefined,
+                    position: 'relative',
+                  }}
+                  styles={{ body: { padding: 32 } }}
+                >
+                  {plan.popular && (
+                    <Tag color="purple" style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 14, padding: '2px 16px' }}>
+                      最受欢迎
+                    </Tag>
+                  )}
+                  <Title level={4}>{plan.name}</Title>
+                  <div style={{ margin: '16px 0' }}>
+                    <span style={{ fontSize: 40, fontWeight: 'bold', color: '#667eea' }}>¥{plan.price}</span>
+                  </div>
+                  <Text>{plan.credits} 积分</Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: 13 }}>{plan.desc}</Text>
+                  <br />
+                  <Button type={plan.popular ? 'primary' : 'default'} style={{ marginTop: 16 }} onClick={() => navigate('/register')}>
+                    立即注册
+                  </Button>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <Space wrap>
+              <Tag icon={<SafetyOutlined />} color="blue" style={{ fontSize: 13, padding: '4px 12px' }}>积分永久有效</Tag>
+              <Tag icon={<SafetyOutlined />} color="blue" style={{ fontSize: 13, padding: '4px 12px' }}>推荐好友赚积分</Tag>
+              <Tag icon={<RocketOutlined />} color="blue" style={{ fontSize: 13, padding: '4px 12px' }}>积分可提现</Tag>
+              <Tag icon={<HeartOutlined />} color="blue" style={{ fontSize: 13, padding: '4px 12px' }}>持续迭代更新</Tag>
+            </Space>
+          </div>
         </div>
       </div>
 
@@ -411,14 +447,14 @@ export default function LandingPage() {
       <div style={{ background: '#f7f8fc', padding: '60px 48px', textAlign: 'center' }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
           <GiftOutlined style={{ fontSize: 48, color: '#667eea', marginBottom: 16 }} />
-          <Title level={3}>邀请好友，获取专属权益</Title>
+          <Title level={3}>邀请好友，一起赚积分</Title>
           <Paragraph type="secondary" style={{ fontSize: 15, marginBottom: 24 }}>
-            每邀请一位好友注册，即可获得优先体验新功能的机会。
-            分享链接给同学和同事，一起免费使用！
+            每邀请一位好友注册，获得积分奖励。积分可用于平台消费或直接提现到支付宝/微信。
+            分享链接给同学和同事，一起创作！
           </Paragraph>
           <Space>
             <Button type="primary" icon={<ShareAltOutlined />} size="large" onClick={() => navigate('/register')}>
-              注册即享分享权益
+              注册即享推荐权益
             </Button>
             <Button icon={<LikeOutlined />} size="large" onClick={() => navigate('/register')}>
               了解更多
@@ -434,11 +470,11 @@ export default function LandingPage() {
       }}>
         <Title level={2} style={{ color: '#fff', marginBottom: 8 }}>准备好开始了吗？</Title>
         <Paragraph style={{ color: 'rgba(255,255,255,0.85)', fontSize: 16, marginBottom: 32 }}>
-          已有 10,000+ 用户信任文枢 · 注册即用，无需等待，完全免费
+          已有 10,000+ 用户信任文枢 · 注册即用，低至 ¥9.90 起
         </Paragraph>
         <Space size="middle">
           <Button size="large" onClick={() => navigate('/register')} style={{ fontWeight: 'bold', height: 48, paddingInline: 40, fontSize: 16 }}>
-            免费注册，立即开始
+            立即注册，开始创作
           </Button>
           <Button size="large" ghost onClick={() => navigate('/login')} style={{ height: 48, paddingInline: 32 }}>
             已有账号？登录
@@ -500,7 +536,7 @@ export default function LandingPage() {
             />
           </div>
           <div style={{ fontSize: 13 }}>
-            © 2026 文枢 wenshu.app · 保留一切权利 · 永久免费
+            © 2026 文枢 wenshu.app · 保留一切权利 · 实惠创作平台
           </div>
         </div>
       </div>

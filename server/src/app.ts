@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import authRoutes from './modules/auth/auth.routes';
 import referralRoutes from './modules/auth/referral.routes';
+import walletRoutes from './modules/wallet/wallet.routes';
 import plagiarismRoutes from './modules/plagiarism/plagiarism.routes';
 import resumeRoutes from './modules/resume/resume.routes';
 import novelRoutes from './modules/novel/novel.routes';
@@ -23,6 +24,7 @@ app.use(morgan(isProduction ? 'combined' : 'dev'));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/referrals', referralRoutes);
+app.use('/api/wallet', walletRoutes);
 app.use('/api/plagiarism', plagiarismRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/novels', novelRoutes);

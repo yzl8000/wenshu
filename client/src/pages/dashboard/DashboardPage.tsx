@@ -39,10 +39,10 @@ export default function DashboardPage() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
         <Title level={3} style={{ margin: 0 }}>欢迎使用文枢</Title>
-        <Tag color="green">永久免费</Tag>
+        <Tag color="blue">低至 ¥9.90</Tag>
       </div>
       <Paragraph type="secondary" style={{ marginBottom: 32 }}>
-        一站式内容创作工具，涵盖论文查重、简历编写和小说写作三大核心功能，AI 全程辅助，完全免费。
+        一站式内容创作工具，涵盖论文查重、简历编写和小说写作三大核心功能，AI 全程辅助，积分制实惠付费。
       </Paragraph>
       <Row gutter={[24, 24]}>
         {features.map((feature) => (

@@ -10,6 +10,7 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../../stores/useAuthStore';
 import AdBanner from '../AdBanner/AdBanner';
@@ -21,6 +22,7 @@ const menuItems = [
   { key: '/app/plagiarism', icon: <FileSearchOutlined />, label: '论文查重' },
   { key: '/app/resumes', icon: <FileTextOutlined />, label: '简历编写' },
   { key: '/app/novels', icon: <BookOutlined />, label: '小说写作' },
+  { key: '/app/wallet', icon: <WalletOutlined />, label: '钱包' },
 ];
 
 export default function AppLayout() {
@@ -66,7 +68,7 @@ export default function AppLayout() {
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
               onClick={() => setCollapsed(!collapsed)}
             />
-            <Tag color="green" style={{ margin: 0 }}>完全免费</Tag>
+            <Tag color="blue" style={{ margin: 0 }}>低至几元</Tag>
           </div>
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
             <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
