@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
   Card, Typography, Statistic, Table, Tag, Button, Space,
-  Row, Col, Modal, Input, message, Tabs, Form,
+  Row, Col, Modal, Input, message, Tabs, Form, Upload, Image,
 } from 'antd';
 import {
   DollarOutlined, CheckOutlined, CloseOutlined,
-  WalletOutlined, SettingOutlined,
+  SettingOutlined, UploadOutlined,
 } from '@ant-design/icons';
+import type { UploadProps } from 'antd';
 import api from '../../services/api';
 
 const { Title, Text } = Typography;
@@ -199,22 +200,67 @@ export default function AdminPage() {
           <Form.Item name="alipayAccount" label="支付宝收款账号">
             <Input placeholder="你的支付宝账号（手机号/邮箱）" />
           </Form.Item>
-          <Form.Item name="alipayQr" label="支付宝收款码链接（选填）">
-            <Input placeholder="收款码图片链接，用于展示给用户扫码" />
+          <Form.Item label="支付宝收款码">
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              customRequest={async ({ file, onSuccess, onError }: any) => {
+                const formData = new FormData();
+                formData.append('image', file);
+                try {
+                  const { data } = await api.post('/upload', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                  });
+                  setConfig((prev) => ({ ...prev, alipayQr: data.url }));
+                  message.success('收款码上传成功');
+                  onSuccess?.(data);
+                } catch { onError?.({}); message.error('上传失败'); }
+              }}
+            >
+              <Button icon={<UploadOutlined />}>上传支付宝收款码</Button>
+            </Upload>
+            {config.alipayQr && (
+              <div style={{ marginTop: 8 }}>
+                <Image src={config.alipayQr} width={120} />
+                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, alipayQr: undefined }))}>删除</Button>
+              </div>
+            )}
           </Form.Item>
           <Form.Item name="wechatAccount" label="微信收款账号">
             <Input placeholder="你的微信号" />
           </Form.Item>
-          <Form.Item name="wechatQr" label="微信收款码链接（选填）">
-            <Input placeholder="收款码图片链接，用于展示给用户扫码" />
+          <Form.Item label="微信收款码">
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              customRequest={async ({ file, onSuccess, onError }: any) => {
+                const formData = new FormData();
+                formData.append('image', file);
+                try {
+                  const { data } = await api.post('/upload', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                  });
+                  setConfig((prev) => ({ ...prev, wechatQr: data.url }));
+                  message.success('收款码上传成功');
+                  onSuccess?.(data);
+                } catch { onError?.({}); message.error('上传失败'); }
+              }}
+            >
+              <Button icon={<UploadOutlined />}>上传微信收款码</Button>
+            </Upload>
+            {config.wechatQr && (
+              <div style={{ marginTop: 8 }}>
+                <Image src={config.wechatQr} width={120} />
+                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, wechatQr: undefined }))}>删除</Button>
+              </div>
+            )}
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block>保存设置</Button>
           </Form.Item>
         </Form>
         <Text type="secondary" style={{ fontSize: 12 }}>
-          提示：收款码链接可以先上传到图床（如 imgur.com 或 sm.ms），再把链接填到这里。
-          建议用「微信/支付宝」的"收款码"截图上传。
+          用支付宝/微信截图你的「收款码」，直接上传即可。支持 jpg/png/gif。
         </Text>
       </Modal>
     </div>

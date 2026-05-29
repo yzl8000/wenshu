@@ -3,6 +3,7 @@ import path from 'path';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+import multer from 'multer';
 import authRoutes from './modules/auth/auth.routes';
 import referralRoutes from './modules/auth/referral.routes';
 import walletRoutes from './modules/wallet/wallet.routes';
@@ -31,6 +32,23 @@ app.use('/api/plagiarism', plagiarismRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/novels', novelRoutes);
 app.use('/api/ai', aiRoutes);
+
+// File upload — store as base64 data URL so it survives redeploy
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('只允许上传图片'));
+  },
+});
+
+// Image upload endpoint — returns base64 data URL
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  if (!req.file) { res.status(400).json({ error: '请选择图片' }); return; }
+  const dataUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  res.json({ url: dataUrl });
+});
 
 // Health check
 app.get('/api/health', (_req, res) => {
