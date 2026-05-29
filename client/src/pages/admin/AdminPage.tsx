@@ -80,11 +80,19 @@ export default function AdminPage() {
   };
 
   const handleSaveConfig = async () => {
-    const values = form.getFieldsValue();
-    await api.put('/admin/config', values);
-    setConfig(values);
-    setConfigModal(false);
-    message.success('收款设置已保存');
+    try {
+      const formValues = form.getFieldsValue();
+      const payload = {
+        alipayAccount: formValues.alipayAccount || '',
+        wechatAccount: formValues.wechatAccount || '',
+        alipayQr: config.alipayQr || '',
+        wechatQr: config.wechatQr || '',
+      };
+      await api.put('/admin/config', payload);
+      setConfig(payload);
+      setConfigModal(false);
+      message.success('收款设置已保存');
+    } catch { message.error('保存失败'); }
   };
 
   const refresh = () => fetchAll();
@@ -202,12 +210,9 @@ export default function AdminPage() {
         footer={null}
         width={500}
       >
-        <Form layout="vertical" initialValues={config} onFinish={handleSaveConfig} form={form}>
+        <Form layout="vertical" initialValues={config} form={form}>
           <Form.Item name="alipayAccount" label="支付宝收款账号">
             <Input placeholder="你的支付宝账号（手机号/邮箱）" />
-          </Form.Item>
-          <Form.Item name="alipayQr" hidden>
-            <Input />
           </Form.Item>
           <Form.Item label="支付宝收款码">
             <Upload
@@ -219,7 +224,6 @@ export default function AdminPage() {
                 try {
                   const { data } = await api.post('/upload', formData);
                   setConfig((prev) => ({ ...prev, alipayQr: data.url }));
-                  form.setFieldValue('alipayQr', data.url);
                   message.success('收款码上传成功');
                   onSuccess?.(data);
                 } catch { onError?.({}); message.error('上传失败'); }
@@ -230,18 +234,12 @@ export default function AdminPage() {
             {config.alipayQr && (
               <div style={{ marginTop: 8 }}>
                 <Image src={config.alipayQr} width={120} />
-                <Button type="link" danger size="small" onClick={() => {
-                  setConfig((prev) => ({ ...prev, alipayQr: '' }));
-                  form.setFieldValue('alipayQr', '');
-                }}>删除</Button>
+                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, alipayQr: '' }))}>删除</Button>
               </div>
             )}
           </Form.Item>
           <Form.Item name="wechatAccount" label="微信收款账号">
             <Input placeholder="你的微信号" />
-          </Form.Item>
-          <Form.Item name="wechatQr" hidden>
-            <Input />
           </Form.Item>
           <Form.Item label="微信收款码">
             <Upload
@@ -253,7 +251,6 @@ export default function AdminPage() {
                 try {
                   const { data } = await api.post('/upload', formData);
                   setConfig((prev) => ({ ...prev, wechatQr: data.url }));
-                  form.setFieldValue('wechatQr', data.url);
                   message.success('收款码上传成功');
                   onSuccess?.(data);
                 } catch { onError?.({}); message.error('上传失败'); }
@@ -264,15 +261,12 @@ export default function AdminPage() {
             {config.wechatQr && (
               <div style={{ marginTop: 8 }}>
                 <Image src={config.wechatQr} width={120} />
-                <Button type="link" danger size="small" onClick={() => {
-                  setConfig((prev) => ({ ...prev, wechatQr: '' }));
-                  form.setFieldValue('wechatQr', '');
-                }}>删除</Button>
+                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, wechatQr: '' }))}>删除</Button>
               </div>
             )}
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>保存设置</Button>
+            <Button type="primary" block onClick={handleSaveConfig}>保存设置</Button>
           </Form.Item>
         </Form>
         <Text type="secondary" style={{ fontSize: 12 }}>
