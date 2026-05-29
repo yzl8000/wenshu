@@ -32,6 +32,7 @@ export default function AdminPage() {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [config, setConfig] = useState<PaymentConfig>({});
   const [configModal, setConfigModal] = useState(false);
+  const [form] = Form.useForm();
 
   const fetchAll = async () => {
     try {
@@ -49,6 +50,10 @@ export default function AdminPage() {
   };
 
   useEffect(() => { fetchAll(); }, []);
+
+  useEffect(() => {
+    if (configModal) form.setFieldsValue(config);
+  }, [configModal, config, form]);
 
   const handleApprovePayment = async (id: string) => {
     await api.post(`/admin/payments/${id}/approve`);
@@ -74,10 +79,10 @@ export default function AdminPage() {
     fetchAll();
   };
 
-  const handleSaveConfig = async (values: PaymentConfig) => {
-    const merged = { ...config, ...values };
-    await api.put('/admin/config', merged);
-    setConfig(merged);
+  const handleSaveConfig = async () => {
+    const values = form.getFieldsValue();
+    await api.put('/admin/config', values);
+    setConfig(values);
     setConfigModal(false);
     message.success('收款设置已保存');
   };
@@ -197,9 +202,12 @@ export default function AdminPage() {
         footer={null}
         width={500}
       >
-        <Form layout="vertical" initialValues={config} onFinish={handleSaveConfig}>
+        <Form layout="vertical" initialValues={config} onFinish={handleSaveConfig} form={form}>
           <Form.Item name="alipayAccount" label="支付宝收款账号">
             <Input placeholder="你的支付宝账号（手机号/邮箱）" />
+          </Form.Item>
+          <Form.Item name="alipayQr" hidden>
+            <Input />
           </Form.Item>
           <Form.Item label="支付宝收款码">
             <Upload
@@ -209,10 +217,9 @@ export default function AdminPage() {
                 const formData = new FormData();
                 formData.append('image', file);
                 try {
-                  const { data } = await api.post('/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                  });
+                  const { data } = await api.post('/upload', formData);
                   setConfig((prev) => ({ ...prev, alipayQr: data.url }));
+                  form.setFieldValue('alipayQr', data.url);
                   message.success('收款码上传成功');
                   onSuccess?.(data);
                 } catch { onError?.({}); message.error('上传失败'); }
@@ -223,12 +230,18 @@ export default function AdminPage() {
             {config.alipayQr && (
               <div style={{ marginTop: 8 }}>
                 <Image src={config.alipayQr} width={120} />
-                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, alipayQr: '' }))}>删除</Button>
+                <Button type="link" danger size="small" onClick={() => {
+                  setConfig((prev) => ({ ...prev, alipayQr: '' }));
+                  form.setFieldValue('alipayQr', '');
+                }}>删除</Button>
               </div>
             )}
           </Form.Item>
           <Form.Item name="wechatAccount" label="微信收款账号">
             <Input placeholder="你的微信号" />
+          </Form.Item>
+          <Form.Item name="wechatQr" hidden>
+            <Input />
           </Form.Item>
           <Form.Item label="微信收款码">
             <Upload
@@ -238,10 +251,9 @@ export default function AdminPage() {
                 const formData = new FormData();
                 formData.append('image', file);
                 try {
-                  const { data } = await api.post('/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                  });
+                  const { data } = await api.post('/upload', formData);
                   setConfig((prev) => ({ ...prev, wechatQr: data.url }));
+                  form.setFieldValue('wechatQr', data.url);
                   message.success('收款码上传成功');
                   onSuccess?.(data);
                 } catch { onError?.({}); message.error('上传失败'); }
@@ -252,7 +264,10 @@ export default function AdminPage() {
             {config.wechatQr && (
               <div style={{ marginTop: 8 }}>
                 <Image src={config.wechatQr} width={120} />
-                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, wechatQr: '' }))}>删除</Button>
+                <Button type="link" danger size="small" onClick={() => {
+                  setConfig((prev) => ({ ...prev, wechatQr: '' }));
+                  form.setFieldValue('wechatQr', '');
+                }}>删除</Button>
               </div>
             )}
           </Form.Item>
