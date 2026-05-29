@@ -1,8 +1,25 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
+  // Create default admin account
+  const adminEmail = 'admin@wenshu.com';
+  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+  if (!existingAdmin) {
+    await prisma.user.create({
+      data: {
+        email: adminEmail,
+        passwordHash: await bcrypt.hash('admin123', 10),
+        name: '管理员',
+        balance: 999999,
+        referralCode: 'WXADMIN1',
+      },
+    });
+    console.log('Created admin account: admin@wenshu.com / admin123');
+  }
+
   // Delete existing templates and recreate
   await prisma.resumeTemplate.deleteMany();
 
