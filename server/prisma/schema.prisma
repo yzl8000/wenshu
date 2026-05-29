@@ -43,6 +43,11 @@ model Transaction {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model AppConfig {
+  id    String @id @default("main")
+  value String @default("{}")
+}
+
 model PlagiarismCheck {
   id         String   @id @default(cuid())
   userId     String

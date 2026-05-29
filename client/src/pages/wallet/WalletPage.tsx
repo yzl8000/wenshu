@@ -62,25 +62,16 @@ export default function WalletPage() {
         api.get('/wallet/wallet'),
         api.get('/wallet/transactions'),
         api.get('/wallet/pricing'),
-        api.get('/wallet/pricing').then(() => api.get('/admin/config').catch(() => ({ data: {} }))),
+        api.get('/wallet/payment-config'),
       ]);
       setWallet(walletRes.data);
       setTxs(txRes.data.list || []);
       setPricing(pricingRes.data);
+      setPayConfig(configRes.data || {});
     } catch { /* ignore */ }
   };
 
-  const fetchConfig = async () => {
-    try {
-      const { data } = await api.get('/admin/config');
-      setPayConfig(data || {});
-    } catch {
-      setPayConfig({});
-    }
-  };
-
   useEffect(() => { fetchData(); }, []);
-  useEffect(() => { if (rechargeOpen) fetchConfig(); }, [rechargeOpen]);
 
   const handleSelectPlan = (plan: PricingPlan) => {
     setSelectedPlan(plan);

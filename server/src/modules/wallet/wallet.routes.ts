@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../../common/middleware';
 import { z } from 'zod';
+import { prisma } from '../../common/prisma';
 import {
   getUserWallet, getTransactions, createRecharge, createWithdrawal,
   PRICING,
@@ -11,6 +12,14 @@ const router = Router();
 // Get pricing
 router.get('/pricing', (_req, res) => {
   res.json(PRICING);
+});
+
+// Get payment config (public for authenticated users — shows QR codes)
+router.get('/payment-config', authenticate, async (_req, res) => {
+  try {
+    const record = await prisma.appConfig.findUnique({ where: { id: 'main' } });
+    res.json(record ? JSON.parse(record.value) : {});
+  } catch { res.status(500).json({ error: '获取配置失败' }); }
 });
 
 // Get wallet balance

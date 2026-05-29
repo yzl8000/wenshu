@@ -153,20 +153,38 @@ router.post('/withdrawals/:id/reject', authenticate, adminGuard, async (req, res
   } catch { res.status(500).json({ error: '操作失败' }); }
 });
 
-// Admin config — get/update payment QR codes (stored as simple JSON in description)
-let paymentConfig: { alipayQr?: string; wechatQr?: string; alipayAccount?: string; wechatAccount?: string } = {};
+// Admin config — persist payment QR codes in AppConfig table
+async function getPaymentConfig() {
+  const record = await prisma.appConfig.findUnique({ where: { id: 'main' } });
+  return record ? JSON.parse(record.value) : {};
+}
 
-router.get('/config', authenticate, adminGuard, (_req, res) => {
-  res.json(paymentConfig);
+async function savePaymentConfig(config: Record<string, unknown>) {
+  await prisma.appConfig.upsert({
+    where: { id: 'main' },
+    update: { value: JSON.stringify(config) },
+    create: { id: 'main', value: JSON.stringify(config) },
+  });
+}
+
+router.get('/config', authenticate, adminGuard, async (_req, res) => {
+  try {
+    const config = await getPaymentConfig();
+    res.json(config);
+  } catch { res.status(500).json({ error: '获取配置失败' }); }
 });
 
-router.put('/config', authenticate, adminGuard, (req, res) => {
-  const { alipayQr, wechatQr, alipayAccount, wechatAccount } = req.body;
-  if (alipayQr !== undefined) paymentConfig.alipayQr = alipayQr;
-  if (wechatQr !== undefined) paymentConfig.wechatQr = wechatQr;
-  if (alipayAccount !== undefined) paymentConfig.alipayAccount = alipayAccount;
-  if (wechatAccount !== undefined) paymentConfig.wechatAccount = wechatAccount;
-  res.json({ success: true, config: paymentConfig });
+router.put('/config', authenticate, adminGuard, async (req, res) => {
+  try {
+    const current = await getPaymentConfig();
+    const { alipayQr, wechatQr, alipayAccount, wechatAccount } = req.body;
+    if (alipayQr !== undefined) (current as any).alipayQr = alipayQr;
+    if (wechatQr !== undefined) (current as any).wechatQr = wechatQr;
+    if (alipayAccount !== undefined) (current as any).alipayAccount = alipayAccount;
+    if (wechatAccount !== undefined) (current as any).wechatAccount = wechatAccount;
+    await savePaymentConfig(current);
+    res.json({ success: true, config: current });
+  } catch { res.status(500).json({ error: '保存配置失败' }); }
 });
 
 export default router;
