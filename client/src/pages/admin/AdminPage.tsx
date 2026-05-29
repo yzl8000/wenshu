@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Card, Typography, Statistic, Table, Tag, Button, Space,
-  Row, Col, Modal, Input, message, Tabs, Form, Upload, Image,
+  Row, Col, Modal, Input, message, Tabs, Upload, Image,
 } from 'antd';
 import {
   DollarOutlined, CheckOutlined, CloseOutlined,
@@ -32,7 +32,7 @@ export default function AdminPage() {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [config, setConfig] = useState<PaymentConfig>({});
   const [configModal, setConfigModal] = useState(false);
-  const [form] = Form.useForm();
+  const [editAccount, setEditAccount] = useState({ alipayAccount: '', wechatAccount: '' });
 
   const fetchAll = async () => {
     try {
@@ -45,18 +45,13 @@ export default function AdminPage() {
       setStats(s.data);
       setPayments(p.data);
       setWithdrawals(w.data);
-      setConfig(c.data || {});
+      const cfg = c.data || {};
+      setConfig(cfg);
+      setEditAccount({ alipayAccount: cfg.alipayAccount || '', wechatAccount: cfg.wechatAccount || '' });
     } catch { /* not admin */ }
   };
 
   useEffect(() => { fetchAll(); }, []);
-
-  useEffect(() => {
-    if (configModal) {
-      form.resetFields();
-      form.setFieldsValue({ alipayAccount: config.alipayAccount, wechatAccount: config.wechatAccount });
-    }
-  }, [configModal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleApprovePayment = async (id: string) => {
     await api.post(`/admin/payments/${id}/approve`);
@@ -84,18 +79,13 @@ export default function AdminPage() {
 
   const handleSaveConfig = async () => {
     try {
-      const formValues = form.getFieldsValue();
       const payload = {
-        alipayAccount: formValues.alipayAccount || '',
-        wechatAccount: formValues.wechatAccount || '',
+        alipayAccount: editAccount.alipayAccount,
+        wechatAccount: editAccount.wechatAccount,
         alipayQr: config.alipayQr || '',
         wechatQr: config.wechatQr || '',
       };
-      const res = await api.put('/admin/config', payload);
-      if (res.data?.error) {
-        message.error(res.data.error);
-        return;
-      }
+      await api.put('/admin/config', payload);
       setConfig(payload);
       setConfigModal(false);
       message.success('收款设置已保存');
@@ -220,19 +210,25 @@ export default function AdminPage() {
         footer={null}
         width={500}
       >
-        <Form layout="vertical" initialValues={config} form={form}>
-          <Form.Item name="alipayAccount" label="支付宝收款账号">
-            <Input placeholder="你的支付宝账号（手机号/邮箱）" />
-          </Form.Item>
-          <Form.Item label="支付宝收款码">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <Text strong style={{ display: 'block', marginBottom: 4 }}>支付宝收款账号</Text>
+            <Input
+              placeholder="你的支付宝账号（手机号/邮箱）"
+              value={editAccount.alipayAccount}
+              onChange={(e) => setEditAccount((prev) => ({ ...prev, alipayAccount: e.target.value }))}
+            />
+          </div>
+          <div>
+            <Text strong style={{ display: 'block', marginBottom: 4 }}>支付宝收款码</Text>
             <Upload
               accept="image/*"
               showUploadList={false}
               customRequest={async ({ file, onSuccess, onError }: any) => {
-                const formData = new FormData();
-                formData.append('image', file);
+                const fd = new FormData();
+                fd.append('image', file);
                 try {
-                  const { data } = await api.post('/upload', formData);
+                  const { data } = await api.post('/upload', fd);
                   setConfig((prev) => ({ ...prev, alipayQr: data.url }));
                   message.success('收款码上传成功');
                   onSuccess?.(data);
@@ -247,19 +243,25 @@ export default function AdminPage() {
                 <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, alipayQr: '' }))}>删除</Button>
               </div>
             )}
-          </Form.Item>
-          <Form.Item name="wechatAccount" label="微信收款账号">
-            <Input placeholder="你的微信号" />
-          </Form.Item>
-          <Form.Item label="微信收款码">
+          </div>
+          <div>
+            <Text strong style={{ display: 'block', marginBottom: 4 }}>微信收款账号</Text>
+            <Input
+              placeholder="你的微信号"
+              value={editAccount.wechatAccount}
+              onChange={(e) => setEditAccount((prev) => ({ ...prev, wechatAccount: e.target.value }))}
+            />
+          </div>
+          <div>
+            <Text strong style={{ display: 'block', marginBottom: 4 }}>微信收款码</Text>
             <Upload
               accept="image/*"
               showUploadList={false}
               customRequest={async ({ file, onSuccess, onError }: any) => {
-                const formData = new FormData();
-                formData.append('image', file);
+                const fd = new FormData();
+                fd.append('image', file);
                 try {
-                  const { data } = await api.post('/upload', formData);
+                  const { data } = await api.post('/upload', fd);
                   setConfig((prev) => ({ ...prev, wechatQr: data.url }));
                   message.success('收款码上传成功');
                   onSuccess?.(data);
@@ -274,11 +276,9 @@ export default function AdminPage() {
                 <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, wechatQr: '' }))}>删除</Button>
               </div>
             )}
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" block onClick={handleSaveConfig}>保存设置</Button>
-          </Form.Item>
-        </Form>
+          </div>
+          <Button type="primary" block onClick={handleSaveConfig}>保存设置</Button>
+        </div>
         <Text type="secondary" style={{ fontSize: 12 }}>
           用支付宝/微信截图你的「收款码」，直接上传即可。支持 jpg/png/gif。
         </Text>
