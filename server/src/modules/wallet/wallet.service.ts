@@ -41,33 +41,26 @@ export async function getTransactions(userId: string, page = 1, pageSize = 20) {
   return { total, list, page, pageSize };
 }
 
-export async function createRecharge(userId: string, planId: string) {
+export async function createRecharge(userId: string, planId: string, paymentMethod: string, proof?: string) {
   const plan = PRICING.plans.find((p) => p.id === planId);
   if (!plan) return null;
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return null;
 
-  const newBalance = user.balance + plan.credits;
-
   await prisma.transaction.create({
     data: {
       userId,
       type: 'recharge',
       amount: plan.credits,
-      balance: newBalance,
-      description: `购买${plan.name} (¥${(plan.price / 100).toFixed(2)})`,
-      status: 'completed',
-      paymentMethod: 'simulate',
+      balance: user.balance, // balance unchanged until approved
+      description: `购买${plan.name} (¥${(plan.price / 100).toFixed(2)})${proof ? ` 凭证:${proof}` : ''}`,
+      status: 'pending',
+      paymentMethod,
     },
   });
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { balance: newBalance },
-  });
-
-  return { balance: newBalance, charged: plan.credits };
+  return { message: '充值申请已提交，请等待管理员确认到账', plan: plan.name, credits: plan.credits };
 }
 
 export async function createWithdrawal(userId: string, amount: number, account: string) {

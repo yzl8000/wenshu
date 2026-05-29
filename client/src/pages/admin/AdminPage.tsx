@@ -1,0 +1,222 @@
+import { useState, useEffect } from 'react';
+import {
+  Card, Typography, Statistic, Table, Tag, Button, Space,
+  Row, Col, Modal, Input, message, Tabs, Form,
+} from 'antd';
+import {
+  DollarOutlined, CheckOutlined, CloseOutlined,
+  WalletOutlined, SettingOutlined,
+} from '@ant-design/icons';
+import api from '../../services/api';
+
+const { Title, Text } = Typography;
+
+interface Stats {
+  revenue: number;
+  pendingPayments: number;
+  pendingWithdrawals: number;
+  totalWithdrawn: number;
+}
+
+interface PaymentConfig {
+  alipayQr?: string;
+  wechatQr?: string;
+  alipayAccount?: string;
+  wechatAccount?: string;
+}
+
+export default function AdminPage() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [config, setConfig] = useState<PaymentConfig>({});
+  const [configModal, setConfigModal] = useState(false);
+
+  const fetchAll = async () => {
+    try {
+      const [s, p, w, c] = await Promise.all([
+        api.get('/admin/stats'),
+        api.get('/admin/payments'),
+        api.get('/admin/withdrawals'),
+        api.get('/admin/config'),
+      ]);
+      setStats(s.data);
+      setPayments(p.data);
+      setWithdrawals(w.data);
+      setConfig(c.data || {});
+    } catch { /* not admin */ }
+  };
+
+  useEffect(() => { fetchAll(); }, []);
+
+  const handleApprovePayment = async (id: string) => {
+    await api.post(`/admin/payments/${id}/approve`);
+    message.success('已确认到账，积分已发放');
+    fetchAll();
+  };
+
+  const handleRejectPayment = async (id: string) => {
+    await api.post(`/admin/payments/${id}/reject`);
+    message.success('已拒绝');
+    fetchAll();
+  };
+
+  const handleApproveWithdrawal = async (id: string) => {
+    await api.post(`/admin/withdrawals/${id}/approve`);
+    message.success('已标记打款完成');
+    fetchAll();
+  };
+
+  const handleRejectWithdrawal = async (id: string) => {
+    await api.post(`/admin/withdrawals/${id}/reject`);
+    message.success('已拒绝并退回积分');
+    fetchAll();
+  };
+
+  const handleSaveConfig = async (values: PaymentConfig) => {
+    await api.put('/admin/config', values);
+    setConfig(values);
+    setConfigModal(false);
+    message.success('收款设置已保存');
+  };
+
+  const refresh = () => fetchAll();
+
+  return (
+    <div style={{ maxWidth: 1100 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <Title level={3} style={{ margin: 0 }}>管理后台</Title>
+        <Tag color="red">管理员</Tag>
+      </div>
+
+      {/* Stats */}
+      <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Col span={6}>
+          <Card><Statistic title="充值收入(积分)" value={stats?.revenue || 0} prefix={<DollarOutlined />} /></Card>
+        </Col>
+        <Col span={6}>
+          <Card><Statistic title="待确认充值" value={stats?.pendingPayments || 0} valueStyle={{ color: '#faad14' }} /></Card>
+        </Col>
+        <Col span={6}>
+          <Card><Statistic title="待处理提现" value={stats?.pendingWithdrawals || 0} valueStyle={{ color: '#faad14' }} /></Card>
+        </Col>
+        <Col span={6}>
+          <Card><Statistic title="已提现(积分)" value={stats?.totalWithdrawn || 0} /></Card>
+        </Col>
+      </Row>
+
+      <Tabs
+        defaultActiveKey="payments"
+        tabBarExtraContent={
+          <Space>
+            <Button icon={<SettingOutlined />} onClick={() => setConfigModal(true)}>收款设置</Button>
+            <Button onClick={refresh}>刷新</Button>
+          </Space>
+        }
+        items={[
+          {
+            key: 'payments',
+            label: `待确认充值 (${payments.length})`,
+            children: (
+              <Table
+                dataSource={payments}
+                rowKey="id"
+                columns={[
+                  { title: '用户', dataIndex: ['user', 'name'], width: 100 },
+                  { title: '邮箱', dataIndex: ['user', 'email'], width: 180 },
+                  { title: '描述', dataIndex: 'description', ellipsis: true },
+                  { title: '金额', dataIndex: 'amount', width: 80, render: (v: number) => `${v} 积分` },
+                  {
+                    title: '支付方式', dataIndex: 'paymentMethod', width: 80,
+                    render: (v: string) => v === 'alipay' ? '支付宝' : v === 'wechat' ? '微信' : v,
+                  },
+                  {
+                    title: '时间', dataIndex: 'createdAt', width: 150,
+                    render: (v: string) => new Date(v).toLocaleString('zh-CN'),
+                  },
+                  {
+                    title: '操作', width: 160,
+                    render: (_: any, record: any) => (
+                      <Space>
+                        <Button type="primary" size="small" icon={<CheckOutlined />} onClick={() => handleApprovePayment(record.id)}>
+                          确认到账
+                        </Button>
+                        <Button size="small" danger icon={<CloseOutlined />} onClick={() => handleRejectPayment(record.id)}>
+                          拒绝
+                        </Button>
+                      </Space>
+                    ),
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            key: 'withdrawals',
+            label: `待处理提现 (${withdrawals.length})`,
+            children: (
+              <Table
+                dataSource={withdrawals}
+                rowKey="id"
+                columns={[
+                  { title: '用户', dataIndex: ['user', 'name'], width: 100 },
+                  { title: '邮箱', dataIndex: ['user', 'email'], width: 180 },
+                  { title: '描述', dataIndex: 'description', ellipsis: true },
+                  { title: '金额', dataIndex: 'amount', width: 80, render: (v: number) => `${Math.abs(v)} 积分` },
+                  {
+                    title: '时间', dataIndex: 'createdAt', width: 150,
+                    render: (v: string) => new Date(v).toLocaleString('zh-CN'),
+                  },
+                  {
+                    title: '操作', width: 160,
+                    render: (_: any, record: any) => (
+                      <Space>
+                        <Button type="primary" size="small" icon={<CheckOutlined />} onClick={() => handleApproveWithdrawal(record.id)}>
+                          已打款
+                        </Button>
+                        <Button size="small" danger icon={<CloseOutlined />} onClick={() => handleRejectWithdrawal(record.id)}>
+                          拒绝
+                        </Button>
+                      </Space>
+                    ),
+                  },
+                ]}
+              />
+            ),
+          },
+        ]}
+      />
+
+      {/* Config Modal */}
+      <Modal
+        title="收款方式设置"
+        open={configModal}
+        onCancel={() => setConfigModal(false)}
+        footer={null}
+        width={500}
+      >
+        <Form layout="vertical" initialValues={config} onFinish={handleSaveConfig}>
+          <Form.Item name="alipayAccount" label="支付宝收款账号">
+            <Input placeholder="你的支付宝账号（手机号/邮箱）" />
+          </Form.Item>
+          <Form.Item name="alipayQr" label="支付宝收款码链接（选填）">
+            <Input placeholder="收款码图片链接，用于展示给用户扫码" />
+          </Form.Item>
+          <Form.Item name="wechatAccount" label="微信收款账号">
+            <Input placeholder="你的微信号" />
+          </Form.Item>
+          <Form.Item name="wechatQr" label="微信收款码链接（选填）">
+            <Input placeholder="收款码图片链接，用于展示给用户扫码" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block>保存设置</Button>
+          </Form.Item>
+        </Form>
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          提示：收款码链接可以先上传到图床（如 imgur.com 或 sm.ms），再把链接填到这里。
+          建议用「微信/支付宝」的"收款码"截图上传。
+        </Text>
+      </Modal>
+    </div>
+  );
+}

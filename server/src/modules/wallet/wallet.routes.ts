@@ -34,13 +34,17 @@ router.get('/transactions', authenticate, async (req, res) => {
 // Recharge
 router.post('/recharge', authenticate, async (req, res) => {
   try {
-    const schema = z.object({ planId: z.string() });
+    const schema = z.object({
+      planId: z.string(),
+      paymentMethod: z.string().default('alipay'),
+      proof: z.string().optional(),
+    });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: '请选择套餐' }); return; }
 
-    const result = await createRecharge(req.userId!, parsed.data.planId);
+    const result = await createRecharge(req.userId!, parsed.data.planId, parsed.data.paymentMethod, parsed.data.proof);
     if (!result) { res.status(400).json({ error: '套餐不存在' }); return; }
-    res.json({ balance: result.balance, charged: result.charged });
+    res.json(result);
   } catch { res.status(500).json({ error: '充值失败' }); }
 });
 

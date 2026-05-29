@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
   Card, Typography, Button, Statistic, Row, Col, Table, Tag,
-  Modal, Input, InputNumber, message, Space, Divider, Form, List,
+  Modal, Input, InputNumber, message, Space, Divider, Form,
+  Radio, Image,
 } from 'antd';
 import {
   WalletOutlined, PlusOutlined, SwapOutlined, GiftOutlined,
-  HistoryOutlined,
+  HistoryOutlined, AlipayOutlined, WechatOutlined,
 } from '@ant-design/icons';
 import api from '../../services/api';
 
@@ -35,20 +36,33 @@ interface PricingPlan {
   popular: boolean;
 }
 
+interface PaymentConfig {
+  alipayQr?: string;
+  wechatQr?: string;
+  alipayAccount?: string;
+  wechatAccount?: string;
+}
+
 export default function WalletPage() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [txs, setTxs] = useState<TxRecord[]>([]);
   const [pricing, setPricing] = useState<{ plans: PricingPlan[], creditCosts: Record<string, number> } | null>(null);
+  const [payConfig, setPayConfig] = useState<PaymentConfig>({});
   const [rechargeOpen, setRechargeOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
+  const [payMethod, setPayMethod] = useState<string>('alipay');
+  const [proofText, setProofText] = useState('');
+  const [step, setStep] = useState(0);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const fetchData = async () => {
     try {
-      const [walletRes, txRes, pricingRes] = await Promise.all([
+      const [walletRes, txRes, pricingRes, configRes] = await Promise.all([
         api.get('/wallet/wallet'),
         api.get('/wallet/transactions'),
         api.get('/wallet/pricing'),
+        api.get('/wallet/pricing').then(() => api.get('/admin/config').catch(() => ({ data: {} }))),
       ]);
       setWallet(walletRes.data);
       setTxs(txRes.data.list || []);
@@ -56,17 +70,39 @@ export default function WalletPage() {
     } catch { /* ignore */ }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  const fetchConfig = async () => {
+    try {
+      const { data } = await api.get('/admin/config');
+      setPayConfig(data || {});
+    } catch {
+      setPayConfig({});
+    }
+  };
 
-  const handleRecharge = async (planId: string) => {
+  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { if (rechargeOpen) fetchConfig(); }, [rechargeOpen]);
+
+  const handleSelectPlan = (plan: PricingPlan) => {
+    setSelectedPlan(plan);
+    setStep(1);
+  };
+
+  const handleSubmitPayment = async () => {
+    if (!selectedPlan) return;
     setLoading(true);
     try {
-      const { data } = await api.post('/wallet/recharge', { planId });
-      setWallet({ balance: data.balance });
-      message.success(`充值成功！获得 ${data.charged} 积分`);
+      await api.post('/wallet/recharge', {
+        planId: selectedPlan.id,
+        paymentMethod: payMethod,
+        proof: proofText || undefined,
+      });
+      message.success('支付申请已提交，等待管理员确认到账');
       setRechargeOpen(false);
+      setStep(0);
+      setSelectedPlan(null);
+      setProofText('');
       fetchData();
-    } catch { message.error('充值失败'); }
+    } catch { message.error('提交失败'); }
     finally { setLoading(false); }
   };
 
@@ -160,46 +196,119 @@ export default function WalletPage() {
 
       {/* Recharge Modal */}
       <Modal
-        title="购买积分"
+        title={step === 0 ? '选择套餐' : '扫码支付'}
         open={rechargeOpen}
-        onCancel={() => setRechargeOpen(false)}
+        onCancel={() => { setRechargeOpen(false); setStep(0); setSelectedPlan(null); }}
         footer={null}
-        width={600}
+        width={650}
       >
-        <Row gutter={[16, 16]}>
-          {pricing?.plans.map((plan) => (
-            <Col span={8} key={plan.id}>
-              <Card
-                hoverable
-                style={{
-                  textAlign: 'center',
-                  border: plan.popular ? '2px solid #667eea' : undefined,
-                  position: 'relative',
-                }}
-                onClick={() => handleRecharge(plan.id)}
-              >
-                {plan.popular && (
-                  <Tag color="purple" style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)' }}>
-                    推荐
-                  </Tag>
+        {step === 0 && (
+          <Row gutter={[16, 16]}>
+            {pricing?.plans.map((plan) => (
+              <Col span={8} key={plan.id}>
+                <Card
+                  hoverable
+                  style={{
+                    textAlign: 'center',
+                    border: plan.popular ? '2px solid #667eea' : undefined,
+                    position: 'relative',
+                  }}
+                  onClick={() => handleSelectPlan(plan)}
+                >
+                  {plan.popular && (
+                    <Tag color="purple" style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)' }}>
+                      推荐
+                    </Tag>
+                  )}
+                  <Title level={5}>{plan.name}</Title>
+                  <Title level={3} style={{ color: '#667eea' }}>
+                    ¥{(plan.price / 100).toFixed(2)}
+                  </Title>
+                  <Text type="secondary">{plan.credits} 积分</Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: 12 }}>{plan.desc}</Text>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
+
+        {step === 1 && selectedPlan && (
+          <div>
+            <Card size="small" style={{ marginBottom: 16, textAlign: 'center', background: '#f6f8ff' }}>
+              <Text>套餐：<Text strong>{selectedPlan.name}</Text></Text>
+              <Divider type="vertical" />
+              <Text>金额：<Text strong style={{ color: '#f5222d', fontSize: 18 }}>¥{(selectedPlan.price / 100).toFixed(2)}</Text></Text>
+              <Divider type="vertical" />
+              <Text>获得：<Text strong>{selectedPlan.credits} 积分</Text></Text>
+            </Card>
+
+            <div style={{ marginBottom: 16 }}>
+              <Text strong style={{ display: 'block', marginBottom: 8 }}>选择支付方式：</Text>
+              <Radio.Group value={payMethod} onChange={(e) => setPayMethod(e.target.value)} buttonStyle="solid" size="large">
+                <Radio.Button value="alipay"><AlipayOutlined /> 支付宝</Radio.Button>
+                <Radio.Button value="wechat"><WechatOutlined /> 微信</Radio.Button>
+              </Radio.Group>
+            </div>
+
+            {(payConfig.alipayQr || payConfig.wechatQr || payConfig.alipayAccount || payConfig.wechatAccount) ? (
+              <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                {payMethod === 'alipay' && payConfig.alipayQr && (
+                  <div>
+                    <Image src={payConfig.alipayQr} alt="支付宝收款码" style={{ maxHeight: 200 }} fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" />
+                    {payConfig.alipayAccount && <Text style={{ display: 'block', marginTop: 4 }}>账号：{payConfig.alipayAccount}</Text>}
+                  </div>
                 )}
-                <Title level={5}>{plan.name}</Title>
-                <Title level={3} style={{ color: '#667eea' }}>
-                  ¥{(plan.price / 100).toFixed(2)}
-                </Title>
-                <Text type="secondary">{plan.credits} 积分</Text>
-                <br />
-                <Text type="secondary" style={{ fontSize: 12 }}>{plan.desc}</Text>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <div style={{ marginTop: 16, textAlign: 'center' }}>
-          <Tag color="orange">模拟支付</Tag>
-          <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
-            当前为演示模式，点击即可完成充值
-          </Text>
-        </div>
+                {payMethod === 'wechat' && payConfig.wechatQr && (
+                  <div>
+                    <Image src={payConfig.wechatQr} alt="微信收款码" style={{ maxHeight: 200 }} fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" />
+                    {payConfig.wechatAccount && <Text style={{ display: 'block', marginTop: 4 }}>账号：{payConfig.wechatAccount}</Text>}
+                  </div>
+                )}
+                {payMethod === 'alipay' && !payConfig.alipayQr && payConfig.alipayAccount && (
+                  <div style={{ padding: 32, background: '#f0f2f5', borderRadius: 8 }}>
+                    <AlipayOutlined style={{ fontSize: 48, color: '#1677ff' }} />
+                    <Title level={5} style={{ marginTop: 8 }}>支付宝账号</Title>
+                    <Text copyable style={{ fontSize: 18 }}>{payConfig.alipayAccount}</Text>
+                  </div>
+                )}
+                {payMethod === 'wechat' && !payConfig.wechatQr && payConfig.wechatAccount && (
+                  <div style={{ padding: 32, background: '#f0f2f5', borderRadius: 8 }}>
+                    <WechatOutlined style={{ fontSize: 48, color: '#07c160' }} />
+                    <Title level={5} style={{ marginTop: 8 }}>微信账号</Title>
+                    <Text copyable style={{ fontSize: 18 }}>{payConfig.wechatAccount}</Text>
+                  </div>
+                )}
+                {((payMethod === 'alipay' && !payConfig.alipayQr && !payConfig.alipayAccount) ||
+                  (payMethod === 'wechat' && !payConfig.wechatQr && !payConfig.wechatAccount)) && (
+                  <div style={{ padding: 24, background: '#fffbe6', borderRadius: 8, border: '1px solid #ffe58f' }}>
+                    <Text type="warning">管理员尚未配置收款方式，请联系管理员</Text>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ padding: 24, background: '#fffbe6', borderRadius: 8, border: '1px solid #ffe58f', textAlign: 'center' }}>
+                <Text type="warning">管理员尚未配置收款码，请联系管理员获取付款方式</Text>
+              </div>
+            )}
+
+            <Form.Item label="支付凭证（选填）">
+              <Input.TextArea
+                rows={2}
+                value={proofText}
+                onChange={(e) => setProofText(e.target.value)}
+                placeholder="如：已转账，支付宝尾号1234 / 或填写转账单号"
+              />
+            </Form.Item>
+
+            <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+              <Button onClick={() => setStep(0)}>返回选择</Button>
+              <Button type="primary" onClick={handleSubmitPayment} loading={loading}>
+                我已付款，提交确认
+              </Button>
+            </Space>
+          </div>
+        )}
       </Modal>
 
       {/* Withdraw Modal */}
