@@ -3,13 +3,10 @@ services:
     name: wenshu
     env: node
     buildCommand: cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate
-    startCommand: cd server && mkdir -p data && npx prisma db push && npx tsx prisma/seed.ts && NODE_ENV=production npx tsx src/index.ts
-    volumes:
-      - name: sqlite-data
-        mountPath: /app/server/data
+    startCommand: cd server && npx prisma db push && npx tsx prisma/seed.ts && NODE_ENV=production npx tsx src/index.ts
     envVars:
       - key: DATABASE_URL
-        value: file:./data/dev.db
+        value: postgresql://user:pass@ep-xxxx.us-east-2.aws.neon.tech/dbname?sslmode=require
       - key: JWT_ACCESS_SECRET
         value: a8f5b2c1d3e9f4a6b8c0d2e4f6a8b0c2
       - key: JWT_REFRESH_SECRET
