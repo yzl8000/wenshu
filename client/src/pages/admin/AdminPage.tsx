@@ -75,8 +75,9 @@ export default function AdminPage() {
   };
 
   const handleSaveConfig = async (values: PaymentConfig) => {
-    await api.put('/admin/config', values);
-    setConfig(values);
+    const merged = { ...config, ...values };
+    await api.put('/admin/config', merged);
+    setConfig(merged);
     setConfigModal(false);
     message.success('收款设置已保存');
   };
@@ -222,7 +223,7 @@ export default function AdminPage() {
             {config.alipayQr && (
               <div style={{ marginTop: 8 }}>
                 <Image src={config.alipayQr} width={120} />
-                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, alipayQr: undefined }))}>删除</Button>
+                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, alipayQr: '' }))}>删除</Button>
               </div>
             )}
           </Form.Item>
@@ -251,7 +252,7 @@ export default function AdminPage() {
             {config.wechatQr && (
               <div style={{ marginTop: 8 }}>
                 <Image src={config.wechatQr} width={120} />
-                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, wechatQr: undefined }))}>删除</Button>
+                <Button type="link" danger size="small" onClick={() => setConfig((prev) => ({ ...prev, wechatQr: '' }))}>删除</Button>
               </div>
             )}
           </Form.Item>

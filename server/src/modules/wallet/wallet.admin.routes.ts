@@ -178,10 +178,10 @@ router.put('/config', authenticate, adminGuard, async (req, res) => {
   try {
     const current = await getPaymentConfig();
     const { alipayQr, wechatQr, alipayAccount, wechatAccount } = req.body;
-    if (alipayQr !== undefined) (current as any).alipayQr = alipayQr;
-    if (wechatQr !== undefined) (current as any).wechatQr = wechatQr;
-    if (alipayAccount !== undefined) (current as any).alipayAccount = alipayAccount;
-    if (wechatAccount !== undefined) (current as any).wechatAccount = wechatAccount;
+    if (alipayQr !== undefined) (current as any).alipayQr = alipayQr || undefined;
+    if (wechatQr !== undefined) (current as any).wechatQr = wechatQr || undefined;
+    if (alipayAccount !== undefined) (current as any).alipayAccount = alipayAccount || undefined;
+    if (wechatAccount !== undefined) (current as any).wechatAccount = wechatAccount || undefined;
     await savePaymentConfig(current);
     res.json({ success: true, config: current });
   } catch { res.status(500).json({ error: '保存配置失败' }); }
