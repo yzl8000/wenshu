@@ -91,11 +91,18 @@ export default function AdminPage() {
         alipayQr: config.alipayQr || '',
         wechatQr: config.wechatQr || '',
       };
-      await api.put('/admin/config', payload);
+      const res = await api.put('/admin/config', payload);
+      if (res.data?.error) {
+        message.error(res.data.error);
+        return;
+      }
       setConfig(payload);
       setConfigModal(false);
       message.success('收款设置已保存');
-    } catch { message.error('保存失败'); }
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || err?.message || '保存失败';
+      message.error(msg);
+    }
   };
 
   const refresh = () => fetchAll();
