@@ -52,8 +52,11 @@ export default function AdminPage() {
   useEffect(() => { fetchAll(); }, []);
 
   useEffect(() => {
-    if (configModal) form.setFieldsValue(config);
-  }, [configModal, config, form]);
+    if (configModal) {
+      form.resetFields();
+      form.setFieldsValue({ alipayAccount: config.alipayAccount, wechatAccount: config.wechatAccount });
+    }
+  }, [configModal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleApprovePayment = async (id: string) => {
     await api.post(`/admin/payments/${id}/approve`);
