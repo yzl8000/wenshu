@@ -175,7 +175,7 @@ export default function LandingPage() {
           {[
             { num: 3, label: '核心功能', suffix: '' },
             { num: 6, label: 'AI 能力', suffix: '+' },
-            { num: 990, label: '起售价', suffix: '' },
+            { num: 30, label: '注册送积分', suffix: '' },
           ].map((s) => (
             <div key={s.label}>
               <CountUp end={s.num} suffix={s.suffix} />
@@ -474,7 +474,7 @@ export default function LandingPage() {
       }}>
         <Title level={2} style={{ color: '#fff', marginBottom: 8 }}>准备好开始了吗？</Title>
         <Paragraph style={{ color: 'rgba(255,255,255,0.85)', fontSize: 16, marginBottom: 32 }}>
-          已有 10,000+ 用户信任文枢 · 注册即送 30 积分，免费体验全部功能
+          注册即送 30 积分，免费体验全部功能 · 好用再付费
         </Paragraph>
         <Space size="middle">
           <Button size="large" onClick={() => navigate('/register')} style={{ fontWeight: 'bold', height: 48, paddingInline: 40, fontSize: 16 }}>
@@ -534,8 +534,8 @@ export default function LandingPage() {
           <Divider style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '16px 0' }} />
           <div style={{ marginBottom: 16 }}>
             <ShareButtons
-              title="文枢 - AI驱动的免费创作平台"
-              description="论文查重 · 简历编写 · 小说写作，完全免费，快来试试！"
+              title="文枢 - AI驱动的智能创作平台"
+              description="论文查重 · 简历编写 · 小说写作，注册即送积分免费体验！"
               url="https://wenshu-production.up.railway.app"
             />
           </div>
