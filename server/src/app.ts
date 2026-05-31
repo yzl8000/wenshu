@@ -13,6 +13,7 @@ import plagiarismRoutes from './modules/plagiarism/plagiarism.routes';
 import resumeRoutes from './modules/resume/resume.routes';
 import novelRoutes from './modules/novel/novel.routes';
 import aiRoutes from './modules/ai/ai.routes';
+import demoRoutes from './modules/demo/demo.routes';
 import { errorHandler } from './common/middleware';
 
 const app = express();
@@ -49,6 +50,7 @@ app.use('/api/plagiarism', plagiarismRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/novels', novelRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/demo', demoRoutes);
 
 // File upload — store as base64 data URL so it survives redeploy
 const upload = multer({

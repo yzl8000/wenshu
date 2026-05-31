@@ -22,6 +22,7 @@ import {
 } from '@ant-design/icons';
 import { useAuthStore } from '../../stores/useAuthStore';
 import ShareButtons from '../../components/ShareButtons/ShareButtons';
+import PlagiarismDemo from './PlagiarismDemo';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -183,6 +184,9 @@ export default function LandingPage() {
           ))}
         </div>
       </div>
+
+      {/* Demo Section — Try plagiarism check without login */}
+      <PlagiarismDemo />
 
       {/* Ad Space - Top Banner */}
       <div style={{ maxWidth: 1200, margin: '24px auto', padding: '0 48px' }}>
