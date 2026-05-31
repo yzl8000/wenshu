@@ -1,48 +1,58 @@
+import { useState, useEffect } from 'react';
 import { Card, Col, Row, Statistic, Typography, Tag } from 'antd';
 import { FileSearchOutlined, FileTextOutlined, BookOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 import AdBanner from '../../components/AdBanner/AdBanner';
 
 const { Title, Paragraph } = Typography;
 
-const features = [
-  {
-    key: 'plagiarism',
-    title: '论文查重',
-    icon: <FileSearchOutlined style={{ fontSize: 48, color: '#667eea' }} />,
-    description: '基于 SimHash 和余弦相似度算法的智能查重系统，支持文本输入和文件上传，提供详细的相似度报告和高亮对比。',
-    path: '/app/plagiarism',
-    stat: '0 次检测',
-  },
-  {
-    key: 'resume',
-    title: '简历编写',
-    icon: <FileTextOutlined style={{ fontSize: 48, color: '#52c41a' }} />,
-    description: '多款专业模板任选，表单化编辑实时预览，一键导出高清 PDF 简历，支持随时保存草稿。',
-    path: '/app/resumes',
-    stat: '0 份简历',
-  },
-  {
-    key: 'novel',
-    title: '小说写作',
-    icon: <BookOutlined style={{ fontSize: 48, color: '#fa8c16' }} />,
-    description: '完整的写作工作台：富文本编辑器、章节管理、人物关系图谱、大纲规划、写作统计追踪。',
-    path: '/app/novels',
-    stat: '0 部小说',
-  },
-];
-
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({ plagiarismCount: 0, resumeCount: 0, novelCount: 0 });
+
+  useEffect(() => {
+    api.get('/user/stats').then(({ data }) => setStats(data)).catch(() => {});
+  }, []);
+
+  const features = [
+    {
+      key: 'plagiarism',
+      title: '论文查重',
+      icon: <FileSearchOutlined style={{ fontSize: 48, color: '#667eea' }} />,
+      description: '基于 SimHash 和余弦相似度算法的智能查重系统，支持文本输入和文件上传，提供详细的相似度报告和高亮对比。',
+      path: '/app/plagiarism',
+      count: stats.plagiarismCount,
+      unit: '次检测',
+    },
+    {
+      key: 'resume',
+      title: '简历编写',
+      icon: <FileTextOutlined style={{ fontSize: 48, color: '#52c41a' }} />,
+      description: '多款专业模板任选，表单化编辑实时预览，一键导出高清 PDF 简历，支持随时保存草稿。',
+      path: '/app/resumes',
+      count: stats.resumeCount,
+      unit: '份简历',
+    },
+    {
+      key: 'novel',
+      title: '小说写作',
+      icon: <BookOutlined style={{ fontSize: 48, color: '#fa8c16' }} />,
+      description: '完整的写作工作台：富文本编辑器、章节管理、人物关系图谱、大纲规划、写作统计追踪。',
+      path: '/app/novels',
+      count: stats.novelCount,
+      unit: '部小说',
+    },
+  ];
 
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
         <Title level={3} style={{ margin: 0 }}>欢迎使用文枢</Title>
-        <Tag color="blue">低至 ¥9.90</Tag>
+        <Tag color="green">注册即送 30 积分</Tag>
       </div>
       <Paragraph type="secondary" style={{ marginBottom: 32 }}>
-        一站式内容创作工具，涵盖论文查重、简历编写和小说写作三大核心功能，AI 全程辅助，积分制实惠付费。
+        一站式内容创作工具，涵盖论文查重、简历编写和小说写作三大核心功能，AI 全程辅助，新用户免费体验。
       </Paragraph>
       <Row gutter={[24, 24]}>
         {features.map((feature) => (
@@ -55,7 +65,7 @@ export default function DashboardPage() {
               <div style={{ marginBottom: 16 }}>{feature.icon}</div>
               <Title level={4}>{feature.title}</Title>
               <Paragraph type="secondary">{feature.description}</Paragraph>
-              <Statistic title="使用统计" value={feature.stat} />
+              <Statistic title="已完成" value={feature.count} suffix={feature.unit} />
             </Card>
           </Col>
         ))}

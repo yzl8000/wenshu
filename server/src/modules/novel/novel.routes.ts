@@ -40,6 +40,10 @@ router.delete('/:novelId/outlines/:outlineId', novelController.deleteOutline);
 // Statistics
 router.get('/:novelId/statistics', novelController.getStatistics);
 
+// Export
+router.get('/:novelId/export/txt', novelController.exportTxt);
+router.get('/:novelId/export/html', novelController.exportHtml);
+
 // Goals
 router.get('/:novelId/goals', novelController.listGoals);
 router.post('/:novelId/goals', novelController.createGoal);

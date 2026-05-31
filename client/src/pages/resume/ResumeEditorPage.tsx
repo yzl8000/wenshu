@@ -60,6 +60,15 @@ export default function ResumeEditorPage() {
     await updateResume(currentResume.id, { title });
   };
 
+  const handleExportPDF = () => {
+    const w = window.open('', '_blank');
+    if (!w) { message.error('请允许弹出窗口'); return; }
+    const html = buildResumeHTML(currentResume.sections, currentResume.title);
+    w.document.write(html);
+    w.document.close();
+    w.onload = () => { w.print(); };
+  };
+
   return (
     <div style={{ height: 'calc(100vh - 120px)', display: 'flex', gap: 16 }}>
       {/* Left Panel - Template Selection */}
@@ -76,8 +85,8 @@ export default function ResumeEditorPage() {
               }}
               onClick={() => handleTemplateChange(t.id)}
             >
-              <div style={{ height: 60, background: '#f0f0f0', borderRadius: 4, marginBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FileTextPlaceholder />
+              <div style={{ height: 60, background: `linear-gradient(135deg, ${t.configJson ? getTemplateColor(t.configJson) : '#f0f0f0'} 0%, ${t.configJson ? getTemplateColor2(t.configJson) : '#e0e0e0'} 100%)`, borderRadius: 4, marginBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 'bold' }}>
+                {t.name}
               </div>
               <span style={{ fontSize: 12 }}>{t.name}</span>
             </Card>
@@ -95,6 +104,7 @@ export default function ResumeEditorPage() {
               style={{ width: 200 }}
               onBlur={(e) => handleTitleChange(e.target.value)}
             />
+            <Button type="primary" onClick={handleExportPDF}>导出 PDF</Button>
           </Space>
         </Card>
         <Card
@@ -137,8 +147,50 @@ const FILE_TEXT_ICON = (
   </svg>
 );
 
-function FileTextPlaceholder() {
-  return FILE_TEXT_ICON;
+function getTemplateColor(configJson: unknown) {
+  try { return JSON.parse(configJson as string).primaryColor || '#2c3e50'; } catch { return '#2c3e50'; }
+}
+function getTemplateColor2(configJson: unknown) {
+  try { return JSON.parse(configJson as string).accentColor || '#2980b9'; } catch { return '#2980b9'; }
+}
+
+function buildResumeHTML(sections: ResumeSection[], title: string) {
+  const pi = sections.find((s) => s.sectionType === 'personal_info')?.contentJson as Record<string, string> | undefined;
+  const summary = sections.find((s) => s.sectionType === 'summary')?.contentJson as Record<string, string> | undefined;
+  const education = sections.find((s) => s.sectionType === 'education')?.contentJson as Record<string, unknown[]> | undefined;
+  const experience = sections.find((s) => s.sectionType === 'experience')?.contentJson as Record<string, unknown[]> | undefined;
+  const skills = sections.find((s) => s.sectionType === 'skills')?.contentJson as Record<string, unknown[]> | undefined;
+  const projects = sections.find((s) => s.sectionType === 'projects')?.contentJson as Record<string, unknown[]> | undefined;
+
+  const escape = (s: string) => s?.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') || '';
+
+  const expItems = (experience?.['experience'] as Array<Record<string, string>>)?.filter((e) => e.company) || [];
+  const eduItems = (education?.['education'] as Array<Record<string, string>>)?.filter((e) => e.school) || [];
+  const skillItems = (skills?.['skills'] as Array<Record<string, string>>)?.filter((s) => s.name) || [];
+  const projItems = (projects?.['projects'] as Array<Record<string, string>>)?.filter((p) => p.name) || [];
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escape(title)}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; font-size: 13px; line-height: 1.7; color: #333; max-width: 800px; margin: 0 auto; padding: 40px 50px; }
+  h1 { font-size: 26px; margin-bottom: 4px; }
+  h3 { font-size: 14px; border-bottom: 2px solid #333; padding-bottom: 4px; margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 1px; }
+  .contact { font-size: 12px; color: #666; margin-bottom: 16px; }
+  .item { margin-bottom: 12px; }
+  .item-title { font-weight: bold; font-size: 13px; }
+  .item-sub { float: right; font-size: 12px; color: #666; }
+  .item-desc { font-size: 12px; margin-top: 4px; color: #555; }
+  .skills { font-size: 12px; }
+  @media print { body { padding: 30px; } }
+</style></head><body>
+  ${pi?.name ? `<h1>${escape(pi.name)}</h1>` : '<h1>未命名简历</h1>'}
+  ${pi ? `<p class="contact">${[pi.email, pi.phone, pi.location].filter(Boolean).map(escape).join(' | ')}</p>` : ''}
+  ${summary?.summary ? `<h3>个人总结</h3><p>${escape(summary.summary)}</p>` : ''}
+  ${expItems.length ? `<h3>工作经历</h3>${expItems.map((e) => `<div class="item"><span class="item-title">${escape(e.title || '')}</span><span class="item-sub">${escape(e.company || '')}</span><p class="item-desc">${escape(e.description || '')}</p></div>`).join('')}` : ''}
+  ${eduItems.length ? `<h3>教育背景</h3>${eduItems.map((e) => `<div class="item"><span class="item-title">${escape(e.school || '')}</span><span class="item-sub">${escape(e.degree || '')}</span></div>`).join('')}` : ''}
+  ${projItems.length ? `<h3>项目经验</h3>${projItems.map((p) => `<div class="item"><span class="item-title">${escape(p.name || '')}</span><p class="item-desc">${escape(p.description || '')}</p></div>`).join('')}` : ''}
+  ${skillItems.length ? `<h3>技能特长</h3><p class="skills">${skillItems.map((s) => `${escape(s.name || '')}(${escape(s.level || '')})`).join(' · ')}</p>` : ''}
+</body></html>`;
 }
 
 // ---- Section Forms ----

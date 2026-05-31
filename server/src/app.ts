@@ -23,11 +23,26 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use(morgan(isProduction ? 'combined' : 'dev'));
 
+import { authenticate } from './common/middleware';
+import { prisma } from './common/prisma';
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/referrals', referralRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/admin', walletAdminRoutes);
+
+// User dashboard stats
+app.get('/api/user/stats', authenticate, async (req, res) => {
+  try {
+    const [plagiarismCount, resumeCount, novelCount] = await Promise.all([
+      prisma.plagiarismCheck.count({ where: { userId: req.userId } }),
+      prisma.resume.count({ where: { userId: req.userId } }),
+      prisma.novel.count({ where: { userId: req.userId } }),
+    ]);
+    res.json({ plagiarismCount, resumeCount, novelCount });
+  } catch { res.status(500).json({ error: '获取统计失败' }); }
+});
 app.use('/api/plagiarism', plagiarismRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/novels', novelRoutes);

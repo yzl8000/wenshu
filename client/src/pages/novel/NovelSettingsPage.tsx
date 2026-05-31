@@ -52,15 +52,19 @@ export default function NovelSettingsPage({ novelId }: { novelId: string }) {
     fetchData();
   };
 
-  const handleExport = (format: string) => {
-    api.get(`/novels/${novelId}/export/${format}`, { responseType: 'blob' }).then(({ data }) => {
-      const url = URL.createObjectURL(data);
+  const handleExport = async (format: string) => {
+    try {
+      const res = await api.get(`/novels/${novelId}/export/${format}`);
+      const blob = new Blob([res.data], { type: format === 'html' ? 'text/html' : 'text/plain' });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `novel.${format}`;
       a.click();
       URL.revokeObjectURL(url);
-    }).catch(() => message.error('导出功能需配置 Puppeteer'));
+    } catch {
+      message.error('导出失败');
+    }
   };
 
   return (
@@ -138,13 +142,11 @@ export default function NovelSettingsPage({ novelId }: { novelId: string }) {
 
       <Card title="导出">
         <Space>
-          <Button icon={<DownloadOutlined />} onClick={() => handleExport('txt')}>导出 TXT</Button>
-          <Button icon={<DownloadOutlined />} onClick={() => handleExport('pdf')}>导出 PDF</Button>
-          <Button icon={<DownloadOutlined />} onClick={() => handleExport('docx')}>导出 DOCX</Button>
-          <Button icon={<DownloadOutlined />} onClick={() => handleExport('epub')}>导出 EPUB</Button>
+          <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleExport('txt')}>导出 TXT</Button>
+          <Button icon={<DownloadOutlined />} onClick={() => handleExport('html')}>导出 HTML（可打印PDF）</Button>
         </Space>
         <Divider />
-        <Text type="secondary">PDF/DOCX/EPUB 导出需要完整配置 Puppeteer 和格式转换库。</Text>
+        <Text type="secondary">TXT / HTML 格式立即可用。HTML 格式排版精美，浏览器打开后按 Ctrl+P 即可保存为 PDF。</Text>
       </Card>
     </div>
   );

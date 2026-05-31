@@ -69,14 +69,14 @@ const comparisonData = [
   { feature: '简历编写', wenshu: true, youdao: true, zhiwang: false, paperpass: false },
   { feature: '小说写作', wenshu: true, youdao: false, zhiwang: false, paperpass: false },
   { feature: 'AI 辅助', wenshu: true, youdao: true, zhiwang: false, paperpass: false },
-  { feature: '低至 ¥9.90', wenshu: true, youdao: false, zhiwang: false, paperpass: false },
+  { feature: '新用户免费体验', wenshu: true, youdao: false, zhiwang: false, paperpass: false },
   { feature: '数据云端存储', wenshu: true, youdao: true, zhiwang: true, paperpass: true },
   { feature: '多格式导出', wenshu: true, youdao: true, zhiwang: false, paperpass: true },
   { feature: 'API 开放', wenshu: true, youdao: false, zhiwang: false, paperpass: false },
 ];
 
 const faqItems = [
-  { q: '文枢怎么收费？', a: '采用积分制，最低 ¥9.90 起即可使用全部功能。查重一次消耗 10 积分(约0.1元)，比市面上几百块的查重服务便宜得多。' },
+  { q: '文枢怎么收费？', a: '新用户注册即送 30 积分（可免费查重 3 次）。之后采用积分制，最低 ¥9.90 起即可使用全部功能。查重一次消耗 10 积分，比市面上几百块的查重服务便宜得多。' },
   { q: '积分可以提现吗？', a: '可以！推荐好友获得的积分奖励和充值余额都支持提现到支付宝/微信，最低提现 10 元。' },
   { q: '论文查重准确率如何？', a: '采用 SimHash + 余弦相似度双重算法，准确率可达95%以上，支持联网搜索交叉验证。' },
   { q: '上传的文件安全吗？', a: '您的数据加密存储，不会用于任何其他目的。文件处理后会定期清理。' },
@@ -136,7 +136,7 @@ export default function LandingPage() {
           文枢
         </Text>
         <Space>
-          <Tag color="blue" style={{ fontSize: 13, padding: '2px 10px' }}>低至 ¥9.90</Tag>
+          <Tag color="green" style={{ fontSize: 13, padding: '2px 10px' }}>注册送 30 积分</Tag>
           {user ? (
             <Button type="primary" onClick={() => navigate('/app/dashboard')}>进入工作台</Button>
           ) : (
@@ -154,13 +154,13 @@ export default function LandingPage() {
         padding: '80px 48px', textAlign: 'center', color: '#fff',
       }}>
         <Tag color="yellow" style={{ fontSize: 14, padding: '4px 16px', marginBottom: 24, fontWeight: 'bold', color: '#333' }}>
-          低至 ¥9.90 · 性价比之选
+          注册即送 30 积分 · 免费体验
         </Tag>
         <Title level={1} style={{ color: '#fff', fontSize: 48, marginBottom: 16 }}>
           文枢 · AI 驱动的创作平台
         </Title>
         <Paragraph style={{ color: 'rgba(255,255,255,0.85)', fontSize: 18, maxWidth: 600, margin: '0 auto 32px' }}>
-          论文查重 · 简历编写 · 小说写作，三大工具一站配齐，AI 全程辅助，低至 ¥9.90 起
+          论文查重 · 简历编写 · 小说写作，AI 全程辅助，注册即送积分免费体验
         </Paragraph>
         <Space size="middle">
           <Button size="large" onClick={() => navigate('/register')} style={{ fontWeight: 'bold', height: 48, paddingInline: 32 }}>
@@ -470,7 +470,7 @@ export default function LandingPage() {
       }}>
         <Title level={2} style={{ color: '#fff', marginBottom: 8 }}>准备好开始了吗？</Title>
         <Paragraph style={{ color: 'rgba(255,255,255,0.85)', fontSize: 16, marginBottom: 32 }}>
-          已有 10,000+ 用户信任文枢 · 注册即用，低至 ¥9.90 起
+          已有 10,000+ 用户信任文枢 · 注册即送 30 积分，免费体验全部功能
         </Paragraph>
         <Space size="middle">
           <Button size="large" onClick={() => navigate('/register')} style={{ fontWeight: 'bold', height: 48, paddingInline: 40, fontSize: 16 }}>

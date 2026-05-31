@@ -451,3 +451,79 @@ export async function deleteGoal(req: Request, res: Response): Promise<void> {
   if (goal.count === 0) { res.status(404).json({ error: '目标不存在' }); return; }
   res.json({ success: true });
 }
+
+// ---- Export ----
+
+export async function exportTxt(req: Request, res: Response): Promise<void> {
+  const novel = await prisma.novel.findFirst({ where: { id: req.params.novelId, userId: req.userId! } });
+  if (!novel) { res.status(404).json({ error: '小说不存在' }); return; }
+
+  const chapters = await prisma.chapter.findMany({
+    where: { novelId: novel.id },
+    orderBy: { sortOrder: 'asc' },
+    select: { title: true, plainText: true },
+  });
+
+  let txt = `${novel.title}\n${'='.repeat(novel.title.length)}\n\n`;
+  for (const ch of chapters) {
+    txt += `\n${ch.title}\n${'-'.repeat(ch.title.length)}\n\n`;
+    txt += (ch.plainText || '（空章节）') + '\n\n';
+  }
+
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(novel.title)}.txt"`);
+  res.send(txt);
+}
+
+export async function exportHtml(req: Request, res: Response): Promise<void> {
+  const novel = await prisma.novel.findFirst({ where: { id: req.params.novelId, userId: req.userId! } });
+  if (!novel) { res.status(404).json({ error: '小说不存在' }); return; }
+
+  const chapters = await prisma.chapter.findMany({
+    where: { novelId: novel.id },
+    orderBy: { sortOrder: 'asc' },
+    select: { title: true, contentJson: true },
+  });
+
+  let html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(novel.title)}</title>
+<style>body{font-family:"Microsoft YaHei",serif;max-width:800px;margin:0 auto;padding:40px;line-height:2;font-size:16px}
+h1{text-align:center;margin-bottom:40px}h2{margin-top:30px;border-bottom:1px solid #ddd;padding-bottom:8px}
+p{text-indent:2em;margin:12px 0}@media print{body{padding:20px}}</style></head><body>
+<h1>${escapeHtml(novel.title)}</h1>\n`;
+
+  for (const ch of chapters) {
+    html += `<h2>${escapeHtml(ch.title)}</h2>\n`;
+    let contentJson: any;
+    try { contentJson = JSON.parse(ch.contentJson || '{}'); } catch { contentJson = {}; }
+    const text = extractTextFromTipTap(contentJson);
+    if (text) {
+      for (const para of text.split('\n').filter(Boolean)) {
+        html += `<p>${escapeHtml(para)}</p>\n`;
+      }
+    } else {
+      html += '<p style="color:#999">（空章节）</p>\n';
+    }
+  }
+  html += '</body></html>';
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(novel.title)}.html"`);
+  res.send(html);
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function extractTextFromTipTap(json: Record<string, unknown>): string {
+  const texts: string[] = [];
+  function walk(node: any) {
+    if (typeof node === 'string') { texts.push(node); return; }
+    if (node?.text) { texts.push(node.text); }
+    if (node?.content && Array.isArray(node.content)) {
+      for (const child of node.content) walk(child);
+    }
+  }
+  walk(json);
+  return texts.join('');
+}
