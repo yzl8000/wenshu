@@ -15,6 +15,8 @@ function generateReferralCode(): string {
   return `WX${code}`;
 }
 
+const FREE_CREDITS = 30; // 3 free plagiarism checks
+
 export async function register(data: { email: string; password: string; name: string; referralCode?: string }) {
   const existing = await prisma.user.findUnique({ where: { email: data.email } });
   if (existing) return null;
@@ -36,9 +38,41 @@ export async function register(data: { email: string; password: string; name: st
       name: data.name,
       referralCode,
       referredBy,
+      balance: FREE_CREDITS,
     },
-    select: { id: true, email: true, name: true, avatar: true, referralCode: true, referredBy: true, createdAt: true },
+    select: { id: true, email: true, name: true, avatar: true, referralCode: true, referredBy: true, balance: true, createdAt: true },
   });
+
+  // Record the free trial credits
+  await prisma.transaction.create({
+    data: {
+      userId: user.id,
+      type: 'free_trial',
+      amount: FREE_CREDITS,
+      balance: FREE_CREDITS,
+      description: '注册赠送免费体验积分',
+      status: 'completed',
+    },
+  });
+
+  // Give referral bonus to referrer
+  if (referredBy) {
+    const referrer = await prisma.user.findUnique({ where: { referralCode: referredBy } });
+    if (referrer) {
+      const bonus = 10;
+      await prisma.user.update({ where: { id: referrer.id }, data: { balance: referrer.balance + bonus } });
+      await prisma.transaction.create({
+        data: {
+          userId: referrer.id,
+          type: 'referral_bonus',
+          amount: bonus,
+          balance: referrer.balance + bonus,
+          description: `推荐用户 ${user.email} 注册奖励`,
+          status: 'completed',
+        },
+      });
+    }
+  }
 
   const payload = { userId: user.id, email: user.email };
   return {
@@ -70,6 +104,7 @@ export async function login(data: { email: string; password: string }) {
       name: user.name,
       avatar: user.avatar,
       referralCode,
+      balance: user.balance,
       createdAt: user.createdAt,
     },
     accessToken: signAccessToken(payload),
@@ -94,7 +129,7 @@ export async function getUserById(userId: string) {
   let user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
-      id: true, email: true, name: true, avatar: true,
+      id: true, email: true, name: true, avatar: true, balance: true,
       referralCode: true, referredBy: true, createdAt: true,
       _count: { select: { referredUsers: true } },
     },

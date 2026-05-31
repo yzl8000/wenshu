@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticate } from '../../common/middleware';
+import { requireCredits } from '../wallet/creditCheck';
 import * as plagiarismController from './plagiarism.controller';
 
 const storage = multer.diskStorage({
@@ -31,7 +32,7 @@ const router = Router();
 
 router.use(authenticate);
 
-router.post('/checks', upload.single('file'), plagiarismController.createCheck);
+router.post('/checks', requireCredits('plagiarism'), upload.single('file'), plagiarismController.createCheck);
 router.get('/checks', plagiarismController.listChecks);
 router.get('/checks/:id', plagiarismController.getCheck);
 router.delete('/checks/:id', plagiarismController.deleteCheck);

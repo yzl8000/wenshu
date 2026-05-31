@@ -70,12 +70,21 @@ export default function AppLayout() {
             />
             <Tag color="blue" style={{ margin: 0 }}>低至几元</Tag>
           </div>
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Avatar icon={<UserOutlined />} />
-              <span>{user?.name || '用户'}</span>
-            </div>
-          </Dropdown>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Tag
+              color={user?.balance && user.balance > 0 ? 'green' : 'orange'}
+              style={{ cursor: 'pointer', margin: 0 }}
+              onClick={() => navigate('/app/wallet')}
+            >
+              <WalletOutlined /> {user?.balance ?? 0} 积分
+            </Tag>
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+              <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Avatar icon={<UserOutlined />} />
+                <span>{user?.name || '用户'}</span>
+              </div>
+            </Dropdown>
+          </div>
         </Header>
         <Content style={{ margin: 24, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Outlet />
