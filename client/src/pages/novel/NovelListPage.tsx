@@ -22,7 +22,7 @@ export default function NovelListPage() {
       setModalOpen(false);
       form.resetFields();
       message.success('小说已创建');
-      navigate(`/novels/${id}`);
+      navigate(`/app/novels/${id}`);
     } catch { message.error('创建失败'); }
   };
 

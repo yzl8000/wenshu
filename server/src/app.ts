@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import multer from 'multer';
 import authRoutes from './modules/auth/auth.routes';
+import resetRoutes from './modules/auth/auth.reset';
 import referralRoutes from './modules/auth/referral.routes';
 import walletRoutes from './modules/wallet/wallet.routes';
 import walletAdminRoutes from './modules/wallet/wallet.admin.routes';
@@ -28,6 +29,7 @@ import { prisma } from './common/prisma';
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', resetRoutes);
 app.use('/api/referrals', referralRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/admin', walletAdminRoutes);

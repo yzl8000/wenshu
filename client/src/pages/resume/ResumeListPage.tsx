@@ -22,7 +22,7 @@ export default function ResumeListPage() {
     }
     try {
       const id = await createResume(templates[0].id, '未命名简历');
-      navigate(`/resumes/${id}/edit`);
+      navigate(`/app/resumes/${id}/edit`);
     } catch {
       message.error('创建失败');
     }

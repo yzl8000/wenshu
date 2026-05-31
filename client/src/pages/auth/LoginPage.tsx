@@ -47,6 +47,9 @@ export default function LoginPage() {
         </Form>
         <div style={{ textAlign: 'center' }}>
           <Text>还没有账号？</Text> <Link to="/register">立即注册</Link>
+          <div style={{ marginTop: 8 }}>
+            <Link to="/forgot-password">忘记密码？</Link>
+          </div>
         </div>
       </Card>
     </div>

@@ -1,7 +1,8 @@
 import { RouterProvider } from 'react-router-dom';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, App as AntApp } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import { router } from './router';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
 export default function App() {
   return (
@@ -14,7 +15,11 @@ export default function App() {
         },
       }}
     >
-      <RouterProvider router={router} />
+      <AntApp>
+        <ErrorBoundary>
+          <RouterProvider router={router} />
+        </ErrorBoundary>
+      </AntApp>
     </ConfigProvider>
   );
 }
