@@ -1,19 +1,29 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import AuthGuard from '../components/AuthGuard/AuthGuard';
-import AppLayout from '../components/AppLayout/AppLayout';
+import { Spin } from 'antd';
+
+// Public pages — eagerly loaded for fast initial render
 import LandingPage from '../pages/landing/LandingPage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
-import DashboardPage from '../pages/dashboard/DashboardPage';
-import PlagiarismPage from '../pages/plagiarism/PlagiarismPage';
-import ResumeListPage from '../pages/resume/ResumeListPage';
-import ResumeEditorPage from '../pages/resume/ResumeEditorPage';
-import NovelListPage from '../pages/novel/NovelListPage';
-import NovelWorkspace from '../pages/novel/NovelWorkspace';
-import ProfilePage from '../pages/profile/ProfilePage';
-import WalletPage from '../pages/wallet/WalletPage';
-import AdminPage from '../pages/admin/AdminPage';
+
+// App pages — lazy loaded (reduces initial bundle by ~2MB)
+const AuthGuard = lazy(() => import('../components/AuthGuard/AuthGuard'));
+const AppLayout = lazy(() => import('../components/AppLayout/AppLayout'));
+const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage'));
+const PlagiarismPage = lazy(() => import('../pages/plagiarism/PlagiarismPage'));
+const ResumeListPage = lazy(() => import('../pages/resume/ResumeListPage'));
+const ResumeEditorPage = lazy(() => import('../pages/resume/ResumeEditorPage'));
+const NovelListPage = lazy(() => import('../pages/novel/NovelListPage'));
+const NovelWorkspace = lazy(() => import('../pages/novel/NovelWorkspace'));
+const ProfilePage = lazy(() => import('../pages/profile/ProfilePage'));
+const WalletPage = lazy(() => import('../pages/wallet/WalletPage'));
+const AdminPage = lazy(() => import('../pages/admin/AdminPage'));
+
+function Lazy({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<Spin size="large" style={{ display: 'block', margin: '100px auto' }} />}>{children}</Suspense>;
+}
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -21,22 +31,22 @@ export const router = createBrowserRouter([
   { path: '/register', element: <RegisterPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   {
-    element: <AuthGuard />,
+    element: <Lazy><AuthGuard /></Lazy>,
     children: [
       {
         path: '/app',
-        element: <AppLayout />,
+        element: <Lazy><AppLayout /></Lazy>,
         children: [
           { index: true, element: <Navigate to="/app/dashboard" replace /> },
-          { path: 'dashboard', element: <DashboardPage /> },
-          { path: 'plagiarism', element: <PlagiarismPage /> },
-          { path: 'resumes', element: <ResumeListPage /> },
-          { path: 'resumes/:id/edit', element: <ResumeEditorPage /> },
-          { path: 'novels', element: <NovelListPage /> },
-          { path: 'novels/:id', element: <NovelWorkspace /> },
-          { path: 'profile', element: <ProfilePage /> },
-          { path: 'wallet', element: <WalletPage /> },
-          { path: 'admin', element: <AdminPage /> },
+          { path: 'dashboard', element: <Lazy><DashboardPage /></Lazy> },
+          { path: 'plagiarism', element: <Lazy><PlagiarismPage /></Lazy> },
+          { path: 'resumes', element: <Lazy><ResumeListPage /></Lazy> },
+          { path: 'resumes/:id/edit', element: <Lazy><ResumeEditorPage /></Lazy> },
+          { path: 'novels', element: <Lazy><NovelListPage /></Lazy> },
+          { path: 'novels/:id', element: <Lazy><NovelWorkspace /></Lazy> },
+          { path: 'profile', element: <Lazy><ProfilePage /></Lazy> },
+          { path: 'wallet', element: <Lazy><WalletPage /></Lazy> },
+          { path: 'admin', element: <Lazy><AdminPage /></Lazy> },
         ],
       },
     ],

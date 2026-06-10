@@ -160,7 +160,10 @@ export default function NovelEditor({ novelId }: { novelId: string }) {
           {saveStatusText && <Tag color={saveStatusColor}>{saveStatusText}</Tag>}
           {currentChapter && (
             <>
-              <Text type="secondary" style={{ fontSize: 12 }}>{currentChapter.wordCount} 字</Text>
+              <Tag color="blue">{currentChapter.wordCount.toLocaleString()} 字</Tag>
+              <Text type="secondary" style={{ fontSize: 11 }}>
+                约 {Math.max(1, Math.round(currentChapter.wordCount / 300))} 分钟阅读
+              </Text>
               <Select
                 size="small"
                 value={currentChapter.status}

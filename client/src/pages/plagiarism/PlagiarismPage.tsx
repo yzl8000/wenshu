@@ -400,9 +400,52 @@ function CheckResultView({ check, onRewriteMatch }: { check: CheckDetail; onRewr
         </Card>
       ))}
 
+      {check.content && check.results.some((r) => r.matches.length > 0) && (
+        <Card title="📝 全文高亮对比" size="small">
+          <HighlightedText content={check.content} matches={check.results.flatMap((r) => r.matches)} />
+        </Card>
+      )}
+
       {check.results.length === 0 && (
         <Empty description="未发现重复内容" />
       )}
     </Space>
+  );
+}
+
+// Highlight matched passages in full text — color-coded by similarity level
+function HighlightedText({ content, matches }: { content: string; matches: Array<{ positionStart: number; positionEnd: number; similarity: number; id: string }> }) {
+  const sorted = [...matches].sort((a, b) => a.positionStart - b.positionStart);
+  const segments: Array<{ text: string; similarity: number | null }> = [];
+  let lastEnd = 0;
+
+  for (const m of sorted) {
+    if (m.positionStart < lastEnd) continue;
+    if (m.positionStart > lastEnd) {
+      segments.push({ text: content.slice(lastEnd, m.positionStart), similarity: null });
+    }
+    const end = Math.min(m.positionEnd, content.length);
+    segments.push({ text: content.slice(m.positionStart, end), similarity: m.similarity });
+    lastEnd = end;
+  }
+  if (lastEnd < content.length) {
+    segments.push({ text: content.slice(lastEnd), similarity: null });
+  }
+
+  const bgColor = (sim: number | null) => {
+    if (sim === null) return 'transparent';
+    if (sim > 0.7) return '#ffccc7';
+    if (sim > 0.4) return '#ffe7ba';
+    return '#ffffb8';
+  };
+
+  return (
+    <div style={{ maxHeight: 400, overflow: 'auto', fontSize: 14, lineHeight: 2, padding: 12, background: '#fafafa', borderRadius: 6, whiteSpace: 'pre-wrap' }}>
+      {segments.map((seg, i) => (
+        <span key={i} style={{ background: bgColor(seg.similarity) }} title={seg.similarity ? `相似度: ${Math.round(seg.similarity * 100)}%` : undefined}>
+          {seg.text}
+        </span>
+      ))}
+    </div>
   );
 }
